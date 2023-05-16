@@ -129,6 +129,36 @@
 				window.app = new App();
 				window.location.href = "?~~localhost:8000#";
 			}
+			// Establish a WebSocket connection
+			const socket = new WebSocket('ws://localhost:8000/showdown/websocket');
+
+			// Event handler for when the connection is established
+			socket.onopen = function() {
+			// Send the login command
+			socket.send('|/trn aasma0,0,guest');
+			};
+
+			// Event handler for receiving messages from the server
+			socket.onmessage = function(event) {
+			const message = event.data;
+			console.log('Received message:', message);
+
+			// Handle the response from the server
+			if (message.startsWith('|updateuser')) {
+				// You are now logged in, perform further actions if needed
+			}
+			};
+
+			// Event handler for any errors that occur
+			socket.onerror = function(error) {
+			console.error('WebSocket error:', error);
+			};
+
+			// Event handler for when the connection is closed
+			socket.onclose = function(event) {
+			console.log('WebSocket connection closed:', event.code, event.reason);
+			};
+
 		</script>
 	
 

@@ -1,0 +1,4 @@
+{
+  "source_directories": ["src/poke_env/"],
+  "search_path": ["src/"]
+}
