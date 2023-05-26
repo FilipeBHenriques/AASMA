@@ -12,10 +12,10 @@ async def main():
     )
 
     # Sending challenges to 'your_username'
-    # await player.send_challenges("lycamobile", n_challenges=1)
+    await player.send_challenges("aasmaClient0", n_challenges=1)
 
     # Accepting one challenge from any user
-    await player.accept_challenges(None, 1)
+    # await player.accept_challenges(None, 1)
 
     # Accepting three challenges from 'your_username'
     # await player.accept_challenges('your_username', 3)
