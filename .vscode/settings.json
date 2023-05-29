@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "./poke-env/src/poke_env/player",
+        "./poke-env/src"
+    ]
+}

@@ -19,7 +19,6 @@ from typing import List
 from typing import Optional
 from typing import Union
 
-from poke_env.environment.pokemon_type import PokemonType
 from poke_env.environment.abstract_battle import AbstractBattle
 from poke_env.environment.battle import Battle
 from poke_env.environment.double_battle import DoubleBattle
@@ -40,56 +39,6 @@ from poke_env.teambuilder.teambuilder import Teambuilder
 from poke_env.teambuilder.constant_teambuilder import ConstantTeambuilder
 from poke_env.data import GenData, to_id_str
 
-team_1 = """
-Starmie  
-Ability: none  
-EVs: 252 HP / 252 Def / 252 SpA / 252 SpD / 252 Spe  
-IVs: 2 Atk  
-- Psychic  
-- Blizzard  
-- Thunder Wave  
-- Recover  
-
-Exeggutor  
-Ability: none  
-- Sleep Powder  
-- Psychic  
-- Double-Edge  
-- Explosion  
-
-Alakazam  
-Ability: none  
-EVs: 252 HP / 252 Def / 252 SpA / 252 SpD / 252 Spe  
-IVs: 2 Atk  
-- Psychic  
-- Seismic Toss  
-- Thunder Wave  
-- Recover  
-
-Chansey 
-Ability: none  
-EVs: 252 HP / 252 Def / 252 SpA / 252 SpD / 252 Spe  
-IVs: 2 Atk  
-- Ice Beam  
-- Thunderbolt  
-- Thunder Wave  
-- Soft-Boiled  
-
-Snorlax  
-Ability: none  
-- Body Slam  
-- Reflect  
-- Earthquake  
-- Rest  
-
-Tauros
-Ability: none  
-- Body Slam  
-- Hyper Beam  
-- Blizzard  
-- Earthquake  
-"""
-
 
 class Player(PlayerNetwork, ABC):
     """
@@ -107,7 +56,7 @@ class Player(PlayerNetwork, ABC):
         player_configuration: Optional[PlayerConfiguration] = None,
         *,
         avatar: Optional[int] = None,
-        battle_format: str = "gen1ou",
+        battle_format: str = "gen8randombattle",
         log_level: Optional[int] = None,
         max_concurrent_battles: int = 1,
         save_replays: Union[bool, str] = False,
@@ -116,7 +65,7 @@ class Player(PlayerNetwork, ABC):
         start_listening: bool = True,
         ping_interval: Optional[float] = 20.0,
         ping_timeout: Optional[float] = 20.0,
-        team: Optional[Union[str, Teambuilder]] = team_1,
+        team: Optional[Union[str, Teambuilder]] = None,
     ) -> None:
         """
         :param player_configuration: Player configuration. If empty, defaults to an
@@ -467,6 +416,45 @@ class Player(PlayerNetwork, ABC):
                     break
         await self._battle_count_queue.join()
 
+    def getAllMovesTeam(self, battle:Battle):
+        all_moves = []
+        all_moves.append((battle.active_pokemon, battle.available_moves))
+        print(str(battle.active_pokemon.species) + " -> " + str(battle.available_moves))
+        for poke_benched in battle.available_switches:
+            all_moves.append((poke_benched.species, poke_benched._moves))
+            print(str(poke_benched.species) + " -> " + str(poke_benched._moves))
+        return all_moves
+
+    def getWeaknesses(self, battle:Battle):
+        opp = battle.opponent_active_pokemon                                                                                                                                                                 
+        types = ['BUG', 'DRAGON', 'ELECTRIC', 'FIGHTING', 'FIRE', 'FLYING', 'GHOST',                             
+              'GRASS', 'GROUND', 'ICE', 'NORMAL', 'POISON', 'PSYCHIC', 'ROCK',                                  
+              'WATER']                                                                                          
+        type_chart = opp._data.type_chart
+        weakArr = []                                                                                            
+        resiArr = []                                                                                            
+        immuArr = []                                                                                                                                                    
+        if opp._type_2 is None:                                                                                 
+            for type in types:                                                                                  
+                if type_chart[opp._type_1.name][type] == 2:                                                     
+                    weakArr.append((type, type_chart[opp._type_1.name][type]))                                                                                                                                 
+                elif type_chart[opp._type_1.name][type] == 0.5:                                                   
+                    resiArr.append((type, type_chart[opp._type_1.name][type]))                                                                        
+                elif type_chart[opp._type_1.name][type] == 0:                                                   
+                    immuArr.append((type, type_chart[opp._type_1.name][type]))                                                                           
+        else:                                                                                                   
+            for type in types:                                                                                
+                if type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type] >= 2:                  
+                    weakArr.append((type, type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type]))                                                                       
+                elif type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type] >= 0.25 and type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type] != 1:              
+                    resiArr.append((type, type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type]))                                                                       
+                elif type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type] == 0:                
+                    immuArr.append((type, type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type]))                                                                        
+        weakArr = sorted(weakArr, key=lambda x: x[1], reverse=True)
+        resiArr = sorted(resiArr, key=lambda x: x[1], reverse=True)
+        immuArr = sorted(immuArr, key=lambda x: x[1], reverse=True)
+        return [weakArr, resiArr, immuArr]
+        
     @abstractmethod
     def choose_move(
         self, battle: AbstractBattle
@@ -561,81 +549,17 @@ class Player(PlayerNetwork, ABC):
 
     def choose_random_singles_move(self, battle: Battle) -> BattleOrder:
         available_orders = [BattleOrder(move) for move in battle.available_moves]
-
         available_orders.extend(
             [BattleOrder(switch) for switch in battle.available_switches]
         )
-        
-        #########################################################################################################
-        #begin{getWeaknesses(Pokemon pokemon)}                                                                  #   
-        me = battle.active_pokemon                                                                              #
-        opp = battle.opponent_active_pokemon                                                                    #
-                                                                                                                #
-        types = ['BUG', 'DRAGON', 'ELECTRIC', 'FIGHTING', 'FIRE', 'FLYING', 'GHOST',                            #  
-              'GRASS', 'GROUND', 'ICE', 'NORMAL', 'POISON', 'PSYCHIC', 'ROCK',                                  #
-              'WATER']                                                                                          #
-        type_chart = opp._data.type_chart                                                                       #
-                                                                                                                #
-        weakArr = []                                                                                            #
-        resiArr = []                                                                                            #
-        immuArr = []                                                                                            #
-        weakCount = 0                                                                                           #
-        resiCount = 0                                                                                           #
-        immuCount = 0                                                                                           #
-                                                                                                                #
-        if opp._type_2 is None:                                                                                 #
-            for type in types:                                                                                  #
-                #print(type_chart[opp._type_1.name][type])                                                      #
-                if type_chart[opp._type_1.name][type] == 2:                                                     #
-                    weakArr.append(type)                                                                        #                                                         
-                    weakCount += 1                                                                              #
-                elif type_chart[opp._type_1.name][type] == 0.5:                                                 #   
-                    resiArr.append(type)                                                                        #
-                    resiCount += 1                                                                              #
-                elif type_chart[opp._type_1.name][type] == 0:                                                   #
-                    immuArr.append(type)                                                                        #   
-                    immuCount += 1                                                                              #
-        else:                                                                                                   #
-            for type in types:                                                                                  #
-                if type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type] == 2:                  #
-                    weakArr.append(type)                                                                        #
-                    weakCount += 1                                                                              #
-                elif type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type] == 0.5:              #
-                    resiArr.append(type)                                                                        #
-                    resiCount += 1                                                                              #
-                elif type_chart[opp._type_1.name][type]*type_chart[opp._type_2.name][type] == 0:                #
-                    immuArr.append(type)                                                                        #
-                    immuCount += 1                                                                              #
-        #end{getWeaknesses(Pokemon pokemon)}                                                                    #
-                                                                                                                #
-        print("Me: ", me.species)                                                                               #
-        print("meType1: ", me._type_1.name)                                                                     #
-        if me._type_2:                                                                                          #   
-            print("meType2: ", me._type_2.name)                                                                 #
-        print("Orders: ")                                                                                       #
-        for order in available_orders:                                                                          #
-            print(order)                                                                                        #
-                                                                                                                #
-        print("Opp: ", opp.species)                                                                             #
-        print("oppType1: ", opp._type_1.name)                                                                   #
-        if opp._type_2:                                                                                         #
-            print("oppType2: ", opp._type_2.name)                                                               #
-        print("Weaknesses: ", weakArr)                                                                          #
-        print("Resistances: ", resiArr)                                                                         #
-        print("Immunities: ", immuArr)                                                                          #
-        print("\n")                                                                                             #
-        #########################################################################################################
-        
         if battle.can_mega_evolve:
             available_orders.extend(
                 [BattleOrder(move, mega=True) for move in battle.available_moves]
             )
-
         if battle.can_dynamax:
             available_orders.extend(
                 [BattleOrder(move, dynamax=True) for move in battle.available_moves]
             )
-
         if battle.can_z_move and battle.active_pokemon:
             available_z_moves = set(battle.active_pokemon.available_z_moves)
             available_orders.extend(
@@ -645,8 +569,10 @@ class Player(PlayerNetwork, ABC):
                     if move in available_z_moves
                 ]
             )
-
         if available_orders:
+            self.getAllMovesTeam(battle)
+            #[weakArr, resiArr, immuArr]
+            print(self.getWeaknesses(battle))
             return available_orders[int(random.random() * len(available_orders))]
         else:
             return self.choose_default_move(battle)
@@ -667,17 +593,6 @@ class Player(PlayerNetwork, ABC):
             raise ValueError(
                 "battle should be Battle or DoubleBattle. Received %d" % (type(battle))
             )
-
-    #def choose_reactive_move(self, battle: Battle) -> BattleOrder:
-        available_orders = [BattleOrder(move) for move in battle.available_moves]
-
-        available_orders.extend(
-            [BattleOrder(switch) for switch in battle.available_switches]
-        )
-
-    
-
-
 
     async def ladder(self, n_games):
         """Make the player play games on the ladder.
