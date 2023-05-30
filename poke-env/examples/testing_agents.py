@@ -124,7 +124,7 @@ async def main():
 
     print(
         "%s won %d / %d battles [this took %f seconds]"
-        % ("random_agent", random_player_2.n_won_battles, n_battles, time.time() - start)
+        % ("Reactive Player", random_player_2.n_won_battles, n_battles, time.time() - start)
     )
 
 
