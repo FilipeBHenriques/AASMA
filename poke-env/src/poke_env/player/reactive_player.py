@@ -17,7 +17,7 @@ class ReactivePlayer(Player):
         resiArr = arrays[1]
         immuArr = arrays[2]
         moves_team = self.getAllMovesTeam(battle)
-        self.print_Weak_Resis_Immun(battle, arrays)
+        self.print_Weak_Resis_Immun(battle, typeMatchup)
         self.print_team_moves(moves_team)
         best_moves = self.find_max_effective_move(weakArr, moves_team[0][1])
         if best_moves and self.check_if_pokemon_has_effects(battle.active_pokemon) is False:
@@ -85,9 +85,9 @@ class ReactivePlayer(Player):
     
     def print_Weak_Resis_Immun(self, battle, arrays):
         print("Opponent [" + str(battle.opponent_active_pokemon.species) +"] is: ")
-        print("Weak against -> " + str(arrays[0]))
-        print("Resistant against -> " + str(arrays[1]))
-        print("Immune against -> " + str(arrays[2]) + "\n")
+        print("Weak against -> " + str(typeMatchup[0]))
+        print("Resistant against -> " + str(typeMatchup[1]))
+        print("Immune against -> " + str(typeMatchup[2]) + "\n")
 
     def print_team_moves(self, moves):
         print("Team available moves")
