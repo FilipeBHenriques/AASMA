@@ -85,9 +85,9 @@ class ReactivePlayer(Player):
     
     def print_Weak_Resis_Immun(self, battle, arrays):
         print("Opponent [" + str(battle.opponent_active_pokemon.species) +"] is: ")
-        print("Weak against -> " + str(typeMatchup[0]))
-        print("Resistant against -> " + str(typeMatchup[1]))
-        print("Immune against -> " + str(typeMatchup[2]) + "\n")
+        print("Weak against -> " + str(arrays[0]))
+        print("Resistant against -> " + str(arrays[1]))
+        print("Immune against -> " + str(arrays[2]) + "\n")
 
     def print_team_moves(self, moves):
         print("Team available moves")
