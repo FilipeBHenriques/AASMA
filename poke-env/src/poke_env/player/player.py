@@ -418,11 +418,9 @@ class Player(PlayerNetwork, ABC):
 
     def getAllMovesTeam(self, battle:Battle):
         all_moves = []
-        all_moves.append((battle.active_pokemon, battle.available_moves))
-        print(str(battle.active_pokemon.species) + " -> " + str(battle.available_moves))
+        all_moves.append((battle.active_pokemon.species, battle.available_moves))
         for poke_benched in battle.available_switches:
             all_moves.append((poke_benched.species, poke_benched._moves))
-            print(str(poke_benched.species) + " -> " + str(poke_benched._moves))
         return all_moves
 
     def getWeaknesses(self, battle:Battle):
@@ -570,9 +568,9 @@ class Player(PlayerNetwork, ABC):
                 ]
             )
         if available_orders:
-            self.getAllMovesTeam(battle)
+            #print(self.getAllMovesTeam(battle))
             #[weakArr, resiArr, immuArr]
-            print(self.getWeaknesses(battle))
+            #print(self.getWeaknesses(battle))
             return available_orders[int(random.random() * len(available_orders))]
         else:
             return self.choose_default_move(battle)
@@ -593,6 +591,9 @@ class Player(PlayerNetwork, ABC):
             raise ValueError(
                 "battle should be Battle or DoubleBattle. Received %d" % (type(battle))
             )
+
+    def choose_reactive_move(self, battle:Battle):
+        pass
 
     async def ladder(self, n_games):
         """Make the player play games on the ladder.

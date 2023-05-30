@@ -75,8 +75,7 @@ class Move:
                     base_power = int(base_power)
                     self._base_power_override = base_power
                 except ValueError:
-                    pass
-
+                    pass         
         self._current_pp = self.max_pp
         self._is_empty: bool = False
 

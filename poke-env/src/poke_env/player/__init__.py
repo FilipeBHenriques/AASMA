@@ -5,6 +5,7 @@ from poke_env.player import openai_api
 from poke_env.player import player
 from poke_env.player import player_network_interface
 from poke_env.player import random_player
+from poke_env.player import reactive_player
 from poke_env.player import utils
 
 from poke_env.player.baselines import MaxBasePowerPlayer, SimpleHeuristicsPlayer
@@ -21,6 +22,7 @@ from poke_env.player.utils import (
     evaluate_player,
 )
 from poke_env.player.random_player import RandomPlayer
+from poke_env.player.reactive_player import ReactivePlayer
 from poke_env.player.player import Player
 from poke_env.player.player_network_interface import PlayerNetwork
 from poke_env.player.openai_api import ObservationType, OpenAIGymEnv
@@ -54,6 +56,7 @@ __all__ = [
     "PlayerNetwork",
     "Player",
     "RandomPlayer",
+    "ReactivePlayer",
     "cross_evaluate",
     "background_cross_evaluate",
     "background_evaluate_player",

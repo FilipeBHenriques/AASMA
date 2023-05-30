@@ -128,7 +128,6 @@ class Pokemon:
     def _add_move(self, move_id: str, use: bool = False) -> Optional[Move]:
         """Store the move if applicable."""
         id_ = Move.retrieve_id(move_id)
-
         if not Move.should_be_stored(id_, self._data.gen):
             return
 
