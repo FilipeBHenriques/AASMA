@@ -118,13 +118,13 @@ async def main():
 
     # Now, let's evaluate our player
     #await random_player_1.battle_against(random_player_2, n_battles=100)
-    n_battles = 3
+    n_battles = 5
     for _ in range(n_battles):
-        await random_player_1.battle_against(random_player_2, 1)
+        await random_player_2.battle_against(random_player_1, 1)
 
     print(
         "%s won %d / %d battles [this took %f seconds]"
-        % ("random_agent", random_player_1.n_won_battles, n_battles, time.time() - start)
+        % ("random_agent", random_player_2.n_won_battles, n_battles, time.time() - start)
     )
 
 
