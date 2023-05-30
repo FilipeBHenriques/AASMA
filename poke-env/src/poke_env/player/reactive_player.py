@@ -11,15 +11,17 @@ from poke_env.environment.pokemon_type import PokemonType
 
 class ReactivePlayer(Player):
     def choose_move(self, battle) -> BattleOrder:
+        print("*********************************")
+        print("Turno -> ", battle._turn)
         print("Active Pokemon -> ", battle.active_pokemon)
-        arrays = self.getWeaknesses(battle)
-        weakArr = arrays[0]
-        resiArr = arrays[1]
-        immuArr = arrays[2]
+        typeMatchup = self.getWeaknesses(battle)
+        weakArr = typeMatchup[0]
+        resiArr = typeMatchup[1]
+        immuArr = typeMatchup[2]
         moves_team = self.getAllMovesTeam(battle)
         self.print_Weak_Resis_Immun(battle, typeMatchup)
         self.print_team_moves(moves_team)
-        best_moves = self.find_max_effective_move(weakArr, moves_team[0][1])
+        best_moves = self.find_strongest_super_effective_move(weakArr, moves_team[0][1])
         if best_moves and self.check_if_pokemon_has_effects(battle.active_pokemon) is False:
             print("Move -> ", best_moves[0][0])
             return BattleOrder(best_moves[0][0]) 
@@ -51,7 +53,7 @@ class ReactivePlayer(Player):
                 return True
         return False
 
-    def find_max_effective_move(self, weakArr, moves):
+    def find_strongest_super_effective_move(self, weakArr, moves):
         best_moves = []
         for weak_type in weakArr:
             for move in moves:
@@ -69,7 +71,7 @@ class ReactivePlayer(Player):
         moves_after_switch = []
         for pokemon in battle.available_switches:
             #print("Switch to -> " + str(pokemon) + " with moves: " + str(list(pokemon.moves.values())))
-            moves_after_switch.append((pokemon, self.find_max_effective_move(weakArr, list(pokemon.moves.values()))))
+            moves_after_switch.append((pokemon, self.find_strongest_super_effective_move(weakArr, list(pokemon.moves.values()))))
         moves_after_switch = [(pokemon, move) for pokemon, move in moves_after_switch if move is not None]
         if moves_after_switch:
             return self.get_best_switch(moves_after_switch)
@@ -83,11 +85,11 @@ class ReactivePlayer(Player):
                 best_switch = (pokemon_moves[0], pokemon_moves[0].current_hp, max_dmg_move)
         return best_switch
     
-    def print_Weak_Resis_Immun(self, battle, arrays):
+    def print_Weak_Resis_Immun(self, battle, typeMatchup):
         print("Opponent [" + str(battle.opponent_active_pokemon.species) +"] is: ")
-        print("Weak against -> " + str(arrays[0]))
-        print("Resistant against -> " + str(arrays[1]))
-        print("Immune against -> " + str(arrays[2]) + "\n")
+        print("Weak against -> " + str(typeMatchup[0]))
+        print("Resistant against -> " + str(typeMatchup[1]))
+        print("Immune against -> " + str(typeMatchup[2]) + "\n")
 
     def print_team_moves(self, moves):
         print("Team available moves")
