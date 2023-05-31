@@ -9,12 +9,27 @@ from poke_env.player.battle_order import BattleOrder
 from poke_env.environment.pokemon_type import PokemonType
 
 
+
+
 class ReactivePlayer(Player):
     def choose_move(self, battle) -> BattleOrder:
         me = battle.active_pokemon
         opp = battle.opponent_active_pokemon
+        #outspeed = me.stats["spe"] > opp.stats["spe"]
+        if me.base_stats["spe"] > opp.base_stats["spe"]:
+            outspeed = 1
+        else:
+            outspeed = 0
+            
+        for move in available_moves:
+            if move._id == "softboiled" or move._id == "recover":
+                reliableRecovery = 1
+            else:
+                reliableRecovery = 0
         available_moves = battle.available_moves
         available_switches = battle.available_switches
+
+
 
         typeMatchup = self.getWeaknesses(battle)
         weakArr = typeMatchup[0]
@@ -24,16 +39,19 @@ class ReactivePlayer(Player):
         print("*********************************")
         print("[Turn ", battle._turn, "]")
         print("Active Pokemon:")
-        print(me.species, me._status, me._current_hp, str([move._id for move in available_moves]))
+        print(me.species, me._status, int((me._current_hp/me.max_hp)*100), me.base_stats["spe"], str([move._id for move in available_moves]))
         print("Benched Pokemon:")
         for available_switch in available_switches:
             print(available_switch.species, available_switch._status, str([move for move in available_switch._moves]))
         print("Opponent Pokemon:")
-        print(opp.species, opp._status, opp._current_hp)
+        print(opp.species, opp._status, opp._current_hp, opp.base_stats["spe"])
         print("Weaknesses: ", weakArr)
         print("Resistances: ", resiArr)
         print("Immunities: ", immuArr)
         
+
+
+        #"""
         moves_team = self.getAllMovesTeam(battle)
         best_moves = self.find_strongest_super_effective_move(weakArr, moves_team[0][1])
         if best_moves and self.check_if_pokemon_has_effects(battle.active_pokemon) is False:
@@ -45,13 +63,20 @@ class ReactivePlayer(Player):
                 print("Switch -> ", switch[0])
                 return BattleOrder(switch[0])
             else:
-                """
-                If the pokemon is less than half hp, switch to the highest hp pokemon that isn't weak against that oponnent
-                else make the move with the highest move_base_power*resistance ratio
-                """
+                
+                #If the pokemon is less than half hp, switch to the highest hp pokemon that isn't weak against that oponnent
+                #else make the move with the highest move_base_power*resistance ratio
+                
                 print("Random")
                 return self.choose_random_singles_move(battle)
+        #"""
     
+    def calculate_damage(level, attack_stat, defense_stat, base_power, stab, type_effectiveness):
+        damage = (((2 * level) / 5 + 2) * base_power * attack_stat / defense_stat) / 50 + 2
+        damage *= stab
+        damage *= type_effectiveness
+        return int(damage)
+
     def check_if_pokemon_has_effects(self, pokemon:Pokemon):
         if pokemon._status:
             if "PAR" in str(pokemon._status):
