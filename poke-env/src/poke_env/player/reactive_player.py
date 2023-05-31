@@ -11,16 +11,30 @@ from poke_env.environment.pokemon_type import PokemonType
 
 class ReactivePlayer(Player):
     def choose_move(self, battle) -> BattleOrder:
-        print("*********************************")
-        print("Turno -> ", battle._turn)
-        print("Active Pokemon -> ", battle.active_pokemon)
+        me = battle.active_pokemon
+        opp = battle.opponent_active_pokemon
+        available_moves = battle.available_moves
+        available_switches = battle.available_switches
+
         typeMatchup = self.getWeaknesses(battle)
         weakArr = typeMatchup[0]
         resiArr = typeMatchup[1]
         immuArr = typeMatchup[2]
+
+        print("*********************************")
+        print("[Turn ", battle._turn, "]")
+        print("Active Pokemon:")
+        print(me.species, me._status, me._current_hp, str([move._id for move in available_moves]))
+        print("Benched Pokemon:")
+        for available_switch in available_switches:
+            print(available_switch.species, available_switch._status, str([move for move in available_switch._moves]))
+        print("Opponent Pokemon:")
+        print(opp.species, opp._status, opp._current_hp)
+        print("Weaknesses: ", weakArr)
+        print("Resistances: ", resiArr)
+        print("Immunities: ", immuArr)
+        
         moves_team = self.getAllMovesTeam(battle)
-        self.print_Weak_Resis_Immun(battle, typeMatchup)
-        self.print_team_moves(moves_team)
         best_moves = self.find_strongest_super_effective_move(weakArr, moves_team[0][1])
         if best_moves and self.check_if_pokemon_has_effects(battle.active_pokemon) is False:
             print("Move -> ", best_moves[0][0])
@@ -92,9 +106,7 @@ class ReactivePlayer(Player):
         print("Immune against -> " + str(typeMatchup[2]) + "\n")
 
     def print_team_moves(self, moves):
-        print("Team available moves")
-        #print(str(moves[0][0]) + "-> " + str([m._id for m in moves[0][1]]))
-        print(str(moves[0][0]) + "-> " + str([m._id for m in moves[0][1]]))
+        print("Available teammates:")
         for move in moves[1:]:
             print(str(move[0]) + "-> " + str([m for m in move[1]]))
         print("#################################################")
