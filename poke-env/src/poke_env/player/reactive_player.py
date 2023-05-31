@@ -49,6 +49,7 @@ class ReactivePlayer(Player):
                 If the pokemon is less than half hp, switch to the highest hp pokemon that isn't weak against that oponnent
                 else make the move with the highest move_base_power*resistance ratio
                 """
+                print("Random")
                 return self.choose_random_singles_move(battle)
     
     def check_if_pokemon_has_effects(self, pokemon:Pokemon):
@@ -67,16 +68,17 @@ class ReactivePlayer(Player):
                 return True
         return False
 
-    def find_strongest_super_effective_move(self, weakArr, moves):
+    def find_strongest_super_effective_move(self, battle, weakArr, moves):
         best_moves = []
         for weak_type in weakArr:
             for move in moves:
-                move_type = PokemonType[move.entry["type"].upper()]._name_
-                if move_type == weak_type[0]:
-                    move_base_power = move.entry.get("basePower", 0)
-                    #print("BasePower = ", move_base_power)
-                    #print("Move -> " + str(move._id) + "| type: " + str(move_type))
-                    best_moves.append((move, move_base_power*weak_type[1]))
+                #if move._id != "selfdestruct" or len(battle.available_switches) > 1:
+                    #if move._id != "counter" and move._id != "nightshade" and move._id != "seismictoss":
+                        move_type = PokemonType[move.entry["type"].upper()]._name_
+                        if move_type == weak_type[0]:
+                            move_base_power = move.entry.get("basePower", 0)
+                            print("Move -> " + str(move._id) + "| type: " + str(move_type) + "| dmg: " + str(move_base_power))
+                            best_moves.append((move, move_base_power*weak_type[1]))
         if best_moves:
             return sorted(best_moves, key=lambda x: x[1], reverse=True)
         return None
@@ -85,7 +87,7 @@ class ReactivePlayer(Player):
         moves_after_switch = []
         for pokemon in battle.available_switches:
             #print("Switch to -> " + str(pokemon) + " with moves: " + str(list(pokemon.moves.values())))
-            moves_after_switch.append((pokemon, self.find_strongest_super_effective_move(weakArr, list(pokemon.moves.values()))))
+            moves_after_switch.append((pokemon, self.find_strongest_super_effective_move(battle, weakArr, list(pokemon.moves.values()))))
         moves_after_switch = [(pokemon, move) for pokemon, move in moves_after_switch if move is not None]
         if moves_after_switch:
             return self.get_best_switch(moves_after_switch)
@@ -95,7 +97,7 @@ class ReactivePlayer(Player):
         best_switch = (moves_after_switch[0][0], moves_after_switch[0][0].current_hp, moves_after_switch[0][1][0][1])
         for pokemon_moves in moves_after_switch:
             max_dmg_move = pokemon_moves[1][0][1]
-            if max_dmg_move > best_switch[2] and self.check_if_pokemon_has_effects(pokemon_moves[0]) is False:
+            if max_dmg_move > best_switch[2]:# and self.check_if_pokemon_has_effects(pokemon_moves[0]) is False:
                 best_switch = (pokemon_moves[0], pokemon_moves[0].current_hp, max_dmg_move)
         return best_switch
     
