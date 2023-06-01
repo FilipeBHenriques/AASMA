@@ -118,7 +118,7 @@ async def main():
 
     # Now, let's evaluate our player
     #await random_player_1.battle_against(random_player_2, n_battles=100)
-    n_battles = 1
+    n_battles = 10
     for _ in range(n_battles):
         await random_player_2.battle_against(random_player_1, 1)
 

@@ -12,7 +12,6 @@ from poke_env.environment.move import Move
 
 MAX_WEIGHT = 2048
 
-
 movesetUsage = {}
 movesetUsage["snorlax"]     = ["bodyslam", "selfdestruct", "earthquake", "hyperbeam", "reflect", "rest", "amnesia", 
                                "counter", "icebeam", "blizzard"]
@@ -49,57 +48,72 @@ sideEffects["PSN"] = ["toxic"]
 
 class ReactivePlayer(Player):
     def choose_move(self, battle) -> BattleOrder:
+        moves_dict = battle.available_moves[0]._moves_dict[battle.available_moves[0]._id]
         me = battle.active_pokemon
         opp = battle.opponent_active_pokemon
-        
         available_moves = battle.available_moves
         available_switches = battle.available_switches
-
         self.print_turnInfo(battle, me, opp, available_moves, available_switches)
+        highestScoringPlay = None
 
         if len(available_moves) == 1:
             return BattleOrder(available_moves[0])
         
-        '''begin{score_available_plays}'''
-        type_chart = opp._data.type_chart
+        highestScoringPlay, highestScore = self.score_available_plays(battle, me, opp, available_moves,moves_dict, available_switches, highestScoringPlay)
+        print(f"Best play fount is ", highestScoringPlay)
+        print("---------------------------------------------------------------------------------------------------")
+        if highestScoringPlay is None:
+            return self.choose_random_singles_move(battle)
+        return BattleOrder(highestScoringPlay)
+    
+    def score_available_plays(self, battle, me, opp, available_moves,moves_dict, available_switches, highestScoringPlay):
         opp_max_hp = floor((opp.base_stats["hp"]+15)*2+252/4)+110
+        highestScore = -1
+        if not(battle._force_switch):
+            highestScoringPlay, highestScore = self.score_available_moves(battle, me, opp, opp_max_hp, available_moves,moves_dict, highestScoringPlay)
+
+        highestScoringSwitch, highestSwitchScore = self.score_available_switches(available_switches,moves_dict, battle, me, opp, opp_max_hp, highestScoringPlay, highestScore)
+        if highestSwitchScore> highestScore:
+            highestScore = highestSwitchScore
+            highestScoringPlay = highestScoringSwitch
+
+        return highestScoringPlay, highestScore
+
+    def score_available_moves(self, battle, me, opp, opp_max_hp, available_moves, moves_dict, highestScoringPlay):
+        type_chart = opp._data.type_chart
         highestScore = 0
-        '''begin{score_available_moves}'''
-        oppDmg_onMe = self.get_opponent_strongest_move_damage(me, opp, battle)
+        oppDmg_onMe = self.get_opponent_strongest_move_damage(me, opp, battle, moves_dict)
         meOutspeed = self.outspeed(me, opp)
         meReliableRecovery = self.reliableRecovery(available_moves)
         print("---------------------------------------------------------------------------------------------------")
         print(f"{me.species.upper()}'s available move's score:")
         print(f"Max damage {opp.species.upper()} threatens {me.species.upper()} with: {oppDmg_onMe:.2f}")
-
         meCurrentHP_percentage = (me._current_hp/me.max_hp)*100
-        highestScoringPlay, highestScore = self.getMovesScore(me, meCurrentHP_percentage, opp, available_moves, battle, opp_max_hp, meOutspeed, meReliableRecovery, oppDmg_onMe, type_chart, highestScore)
-        '''end{score available moves}'''
+        return self.getMovesScore(me, meCurrentHP_percentage, opp, available_moves,moves_dict, battle, opp_max_hp, meOutspeed, meReliableRecovery, oppDmg_onMe, type_chart, highestScoringPlay, highestScore)
 
-        '''begin{score_available_switches}'''
+    def score_available_switches(self, available_switches, moves_dict, battle, me, opp, opp_max_hp, highestScoringPlay, highestScore):
+        type_chart = opp._data.type_chart
         print("Available switches's score:")
         for switch in available_switches:
             switchScore = 0
-            oppDmg_onSwitch = self.get_opponent_strongest_move_damage(switch, opp, battle)
+            oppDmg_onSwitch = self.get_opponent_strongest_move_damage(switch, opp, battle, moves_dict)
             switchOutspeed = self.outspeed(switch, opp)
             switchReliableRecovery = self.reliableRecovery([switch._moves[move] for move in switch._moves])
             print(f"Max damage {opp.species.upper()} threatens {switch.species.upper()} with: {oppDmg_onSwitch:.2f}")
-            
-            switchHpAfterSwitchIn = (switch._current_hp/switch.max_hp)*100-oppDmg_onSwitch
-            filler, switchScore = self.getMovesScore(switch, switchHpAfterSwitchIn, opp, [switch._moves[move] for move in switch._moves], battle, opp_max_hp, switchOutspeed, switchReliableRecovery, oppDmg_onSwitch, type_chart, -1)
+            if battle._force_switch:
+                switchHpAfterSwitchIn = (switch._current_hp/switch.max_hp)*100
+            else:
+                switchHpAfterSwitchIn = (switch._current_hp/switch.max_hp)*100-oppDmg_onSwitch
+
+            filler, switchScore = self.getMovesScore(switch, switchHpAfterSwitchIn, opp, [switch._moves[move] for move in switch._moves], battle, opp_max_hp, switchOutspeed, switchReliableRecovery, oppDmg_onSwitch, type_chart,highestScoringPlay, -1)
             
             if switchScore > highestScore:
                 highestScore = switchScore
                 highestScoringPlay = switch
             print(f"{switch.species}.score \t= {switchScore:.2f}")
-        '''end{score_available_switches}'''
-        '''end{score_available_plays}'''
-        print(f"Best play fount is {BattleOrder(highestScoringPlay)}")
-        print("---------------------------------------------------------------------------------------------------")
-        
-        return BattleOrder(highestScoringPlay)
-    
-    def print_turnInfo(self, battle, me, opp, available_moves, available_switches):
+        return highestScoringPlay, highestScore
+
+    def print_turnInfo(self, battle, me, opp, available_moves,moves_dict, available_switches):
         typeMatchup = self.getWeaknesses(battle)
         weakArr = typeMatchup[0]
         resiArr = typeMatchup[1]
@@ -131,6 +145,10 @@ class ReactivePlayer(Player):
             outspeed = 1
         else:
             outspeed = 0
+        if "PAR" in str(oppPokemon._status) and "PAR" not in str(myPokemon._status):
+            outspeed = 1
+        if "PAR" in str(myPokemon._status) and "PAR" not in str(oppPokemon._status):
+            outspeed = 0
         return outspeed
     
     def reliableRecovery(self, available_moves):
@@ -147,13 +165,13 @@ class ReactivePlayer(Player):
         damage *= type_effectiveness
         return int(damage)
 
-    def get_opponent_strongest_move_damage(self, me, opp, battle):
+    def get_opponent_strongest_move_damage(self, me, opp, battle, moves_dict):
         biggest_damage = 0
         if "SLP" in str(opp._status) or "FRZ" in str(opp._status):
             return biggest_damage
         type_chart = opp._data.type_chart
         for move_id in movesetUsage[opp.species]:
-            move_info = battle.available_moves[0]._moves_dict[move_id]
+            move_info = moves_dict[move_id]
             category = move_info["category"]
             if category == "Physical":
                 attack_stat = floor((opp.base_stats["atk"]+15)*2+252/4)+5
@@ -183,13 +201,12 @@ class ReactivePlayer(Player):
         
         return biggest_damage
     
-    def getMovesScore(self, myPokemon, currentHP_percentage, opp, available_moves, battle, opp_max_hp, outspeed, reliableRecovery, oppDmg, type_chart, highestScore):
-        highestScoringPlay = None
+    def getMovesScore(self, myPokemon, currentHP_percentage, opp, available_moves, moves_dict, battle, opp_max_hp, outspeed, reliableRecovery, oppDmg, type_chart, highestScoringPlay, highestScore):
         for move in available_moves:
             move_dmg = 0
             recoil = 0
             sideEffectVal = 0
-            move_info = battle.available_moves[0]._moves_dict[move._id]
+            move_info = moves_dict[move._id]
             acc = move_info["accuracy"]
             if move_info["secondary"] is not None:
                 effectChance = move_info["secondary"]["chance"]/100
@@ -280,7 +297,6 @@ class ReactivePlayer(Player):
             print(f"{move._id}.damage \t= {move_dmg:.2f}\t{move._id}.sideEff \t= {sideEffectVal:.2f}\t{move._id}.score  \t= {moveScore:.2f}")
         
         return highestScoringPlay, highestScore
-    ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
     def print_Weak_Resis_Immun(self, battle, typeMatchup):
         print("Opponent [" + str(battle.opponent_active_pokemon.species) +"] is: ")
