@@ -62,7 +62,7 @@ class ReactivePlayer(Player):
 
         best_move = self.evaluate_available_moves(available_moves, battle, me, opp)
 
-        print("Chosen_move -> ", best_move._id)
+        print("Chosen_move -> ", best_move)
 
         self.print_team_moves(battle)
         self.print_Weak_Resis_Immun(typeMatchup)
@@ -97,40 +97,44 @@ class ReactivePlayer(Player):
         return reliableRecovery
     
     def evaluate_available_moves(self, available_moves, battle, me, opp):
-        outspeed = self.get_outspeed(me, opp)
         opp_max_hp = floor((opp.base_stats["hp"]+15)*2+252/4)+110
-        oppMaxDmg = self.get_opponent_strongest_move_damage(me, opp, battle)
         max_score = 0
-        best_move = available_moves[0]
-        for move in available_moves:
-            move_info = battle.available_moves[0]._moves_dict[move._id]
-            acc = move_info["accuracy"]
-            if move._id == "softboiled" or move._id == "recover" or move._id == "rest":
-                #placeholder
-                score = 0
-            elif move._id == "amnesia" or move._id == "reflect" or move._id == "agility":
-                #placeholder
-                score = 0
-            elif move._id == "explosion" or move._id == "selfdestruct" or move._id == "hyperbeam" or move._id == "doubleedge":
-                #placeholder
-                score = 0
-            elif move._id == "seismictoss" or move._id == "nightshade":
-                move_dmg = 100/opp_max_hp*100
-                score_baseline = ((me._current_hp/me.max_hp)*100-oppMaxDmg)/100*(move_dmg)*(acc/100)/(oppMaxDmg+1)
-                #add recovery impact
-                if move_dmg > opp._current_hp:
-                    outspeed_benefit = outspeed*MAX_WEIGHT
+        if available_moves:
+            best_move = available_moves[0]
+            outspeed = self.get_outspeed(me, opp)
+            oppMaxDmg = self.get_opponent_strongest_move_damage(me, opp, battle)
+            for move in available_moves:
+                move_info = battle.available_moves[0]._moves_dict[move._id]
+                acc = move_info["accuracy"]
+                if move._id == "softboiled" or move._id == "recover" or move._id == "rest":
+                    #placeholder
+                    score = 0
+                elif move._id == "amnesia" or move._id == "reflect" or move._id == "agility":
+                    #placeholder
+                    score = 0
+                elif move._id == "explosion" or move._id == "selfdestruct" or move._id == "hyperbeam" or move._id == "doubleedge":
+                    #placeholder
+                    score = 0
+                elif move._id == "seismictoss" or move._id == "nightshade":
+                    move_dmg = 100/opp_max_hp*100
+                    score_baseline = ((me._current_hp/me.max_hp)*100-oppMaxDmg)/100*(move_dmg)*(acc/100)/(oppMaxDmg+1)
+                    #add recovery impact
+                    if move_dmg > opp._current_hp:
+                        outspeed_benefit = outspeed*MAX_WEIGHT
+                    else:
+                        outspeed_benefit = 0
+                    
+                    score = score_baseline+outspeed_benefit
                 else:
-                    outspeed_benefit = 0
-                
-                score = score_baseline+outspeed_benefit
-            else:
-                score = self.calculate_normal_move_score(move, move_info, me, opp, opp_max_hp, oppMaxDmg, outspeed)
+                    score = self.calculate_normal_move_score(move, move_info, me, opp, opp_max_hp, oppMaxDmg, outspeed)
 
-            print("[", move._id, "] (", score, ")")
-            if score > max_score:
-                max_score = score
-                best_move = move
+                print("[", move._id, "] (", score, ")")
+                if score > max_score:
+                    max_score = score
+                    best_move = move
+        else: #pokemon morreu -> obrigatório dar switch
+            best_move = battle.available_switches[random.randint(0, len(battle.available_switches)-1)]
+
         return best_move
 
     def calculate_damage(self, level, attack_stat, defense_stat, base_power, stab, type_effectiveness):
