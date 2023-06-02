@@ -67,7 +67,10 @@ class ReactivePlayer(Player):
     def score_available_plays(self, battle, me, opp, available_moves, available_switches, highestScoringPlay):
         opp_max_hp = floor((opp.base_stats["hp"]+15)*2+252/4)+110
         highestScore = -1
-        moves_dict = list(battle.available_switches[0]._moves.values())[0]._moves_dict
+        if battle._force_switch:
+            moves_dict = list(battle.available_switches[0]._moves.values())[0]._moves_dict
+        else:
+            moves_dict = available_moves[0]._moves_dict
         if not(battle._force_switch):
             highestScoringPlay, highestScore = self.score_available_moves(battle, me, opp, opp_max_hp, available_moves,moves_dict, highestScoringPlay)
         
