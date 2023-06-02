@@ -299,9 +299,3 @@ class ReactivePlayer(Player):
             print(f"{move._id}.damage \t= {move_dmg:.2f}\t{move._id}.sideEff \t= {sideEffectVal:.2f}\t{move._id}.score  \t= {moveScore:.2f}")
         
         return highestScoringPlay, highestScore
-
-    def print_Weak_Resis_Immun(self, battle, typeMatchup):
-        print("Opponent [" + str(battle.opponent_active_pokemon.species) +"] is: ")
-        print("Weak against -> " + str(typeMatchup[0]))
-        print("Resistant against -> " + str(typeMatchup[1]))
-        print("Immune against -> " + str(typeMatchup[2]) + "\n")
