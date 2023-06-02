@@ -45,10 +45,8 @@ sideEffects["PAR"] = ["thunderwave", "stunspore", "thunderbolt", "thunder", "bod
 sideEffects["BRN"] = ["firblast"]
 sideEffects["PSN"] = ["toxic"]
 
-
 class ReactivePlayer(Player):
     def choose_move(self, battle) -> BattleOrder:
-        moves_dict = battle.available_moves[0]._moves_dict[battle.available_moves[0]._id]
         me = battle.active_pokemon
         opp = battle.opponent_active_pokemon
         available_moves = battle.available_moves
@@ -59,19 +57,20 @@ class ReactivePlayer(Player):
         if len(available_moves) == 1:
             return BattleOrder(available_moves[0])
         
-        highestScoringPlay, highestScore = self.score_available_plays(battle, me, opp, available_moves,moves_dict, available_switches, highestScoringPlay)
+        highestScoringPlay, highestScore = self.score_available_plays(battle, me, opp, available_moves, available_switches, highestScoringPlay)
         print(f"Best play fount is ", highestScoringPlay)
         print("---------------------------------------------------------------------------------------------------")
         if highestScoringPlay is None:
             return self.choose_random_singles_move(battle)
         return BattleOrder(highestScoringPlay)
     
-    def score_available_plays(self, battle, me, opp, available_moves,moves_dict, available_switches, highestScoringPlay):
+    def score_available_plays(self, battle, me, opp, available_moves, available_switches, highestScoringPlay):
         opp_max_hp = floor((opp.base_stats["hp"]+15)*2+252/4)+110
         highestScore = -1
+        moves_dict = list(battle.available_switches[0]._moves.values())[0]._moves_dict
         if not(battle._force_switch):
             highestScoringPlay, highestScore = self.score_available_moves(battle, me, opp, opp_max_hp, available_moves,moves_dict, highestScoringPlay)
-
+        
         highestScoringSwitch, highestSwitchScore = self.score_available_switches(available_switches,moves_dict, battle, me, opp, opp_max_hp, highestScoringPlay, highestScore)
         if highestSwitchScore> highestScore:
             highestScore = highestSwitchScore
@@ -105,7 +104,7 @@ class ReactivePlayer(Player):
             else:
                 switchHpAfterSwitchIn = (switch._current_hp/switch.max_hp)*100-oppDmg_onSwitch
 
-            filler, switchScore = self.getMovesScore(switch, switchHpAfterSwitchIn, opp, [switch._moves[move] for move in switch._moves], battle, opp_max_hp, switchOutspeed, switchReliableRecovery, oppDmg_onSwitch, type_chart,highestScoringPlay, -1)
+            filler, switchScore = self.getMovesScore(switch, switchHpAfterSwitchIn, opp, [switch._moves[move] for move in switch._moves], moves_dict, battle, opp_max_hp, switchOutspeed, switchReliableRecovery, oppDmg_onSwitch, type_chart,highestScoringPlay, -1)
             
             if switchScore > highestScore:
                 highestScore = switchScore
@@ -113,7 +112,7 @@ class ReactivePlayer(Player):
             print(f"{switch.species}.score \t= {switchScore:.2f}")
         return highestScoringPlay, highestScore
 
-    def print_turnInfo(self, battle, me, opp, available_moves,moves_dict, available_switches):
+    def print_turnInfo(self, battle, me, opp, available_moves, available_switches):
         typeMatchup = self.getWeaknesses(battle)
         weakArr = typeMatchup[0]
         resiArr = typeMatchup[1]
