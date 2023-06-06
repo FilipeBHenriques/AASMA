@@ -131,6 +131,10 @@ class ReactivePlayer(Player):
             outspeed = 1
         else:
             outspeed = 0
+        if "PAR" in str(oppPokemon._status) and "PAR" not in str(myPokemon._status):
+            outspeed = 1
+        if "PAR" in str(myPokemon._status) and "PAR" not in str(oppPokemon._status):
+            outspeed = 0
         return outspeed
     
     def reliableRecovery(self, available_moves):
@@ -177,7 +181,6 @@ class ReactivePlayer(Player):
 
             damage = self.calculate_damage(100, attack_stat, defense_stat, base_power, stab, type_effectiveness)
             damage = damage/me._current_hp*100
-            #print(move_id, stab, type_effectiveness, damage)
             if damage > biggest_damage:
                 biggest_damage = damage
         

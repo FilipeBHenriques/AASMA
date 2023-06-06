@@ -2,6 +2,7 @@ import asyncio
 import time
 
 from poke_env.player import Player, RandomPlayer, ReactivePlayer
+from poke_env.player.proactive_player import ProactivePlayer
 from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
 
 
@@ -109,7 +110,7 @@ async def main():
         battle_format="gen1ou", 
         team=team_1)
     
-    random_player_2 = ReactivePlayer(
+    random_player_2 = ProactivePlayer(
         player_configuration=PlayerConfiguration("aasmaClient0", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
@@ -118,7 +119,7 @@ async def main():
 
     # Now, let's evaluate our player
     #await random_player_1.battle_against(random_player_2, n_battles=100)
-    n_battles = 1
+    n_battles = 5
     for _ in range(n_battles):
         await random_player_2.battle_against(random_player_1, 1)
 
