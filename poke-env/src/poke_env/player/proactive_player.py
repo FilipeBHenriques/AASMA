@@ -83,6 +83,8 @@ class ProactivePlayer(Player):
 
         if debug:
             print(highest_scoring_play)
+        if(highest_scoring_play == None):
+            return self.choose_random_move(battle)
         return BattleOrder(highest_scoring_play)
     
     def print_turnInfo(self, battle, me, opp, available_moves, available_switches):
@@ -115,7 +117,6 @@ class ProactivePlayer(Player):
     def score_available_moves(self, battle, is_switch, me, opp, available_moves, type_chart):
         me_moves_score = []
 
-
         me_recovery_tag = self.recovery(available_moves)
         me_outspeed_tag = self.outspeed(me, opp)
         
@@ -123,7 +124,7 @@ class ProactivePlayer(Player):
 
         me_current_hp = (me._current_hp/me.max_hp)*100-(1+me_outspeed_tag)*opp_max_damage*is_switch
         if debug:
-            print(f"{me.species}'s moves score:")
+            print(f"{me.species}'s moves score (me_current_hp: {me_current_hp:.2f}, opp_max_damage: {opp_max_damage:.2f}, me_outspeed_tag: {me_outspeed_tag}):")
         
         for move in available_moves:
             move_info = move._moves_dict[move._id]
@@ -131,6 +132,7 @@ class ProactivePlayer(Player):
             category = move_info["category"]
 
             move_damage = 0
+            stab = 1
             if category != "Status" and "SLP" not in str(me._status) and "FRZ" not in str(me._status) :
                 if move._id == "seismictoss" or move._id == "nightshade":
                     move_damage = 100
@@ -145,12 +147,11 @@ class ProactivePlayer(Player):
                         defense_stat = floor((opp.base_stats["spd"]+15)*2+252/4)+5
 
                     move_type = move_info["type"].upper()
-                    if move_type == me._type_1:
+                    if move_type == me._type_1.name:
                         stab = 1.5
-                    elif me._type_2 is not None and move_type == me._type_2:
+                    elif me._type_2 is not None and move_type == me._type_2.name:
                         stab = 1.5
-                    else:
-                        stab = 1
+
                     type_effectiveness = type_chart[opp._type_1.name.upper()][move_type]
                     if opp._type_2 is not None:
                         type_effectiveness *= type_chart[opp._type_2.name.upper()][move_type]
@@ -197,15 +198,20 @@ class ProactivePlayer(Player):
                     move_side_effect_value = 75
 
             move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
+            print(f"\t- {move_score:.2f}")
             if me_recovery_tag == 1 and "SLP" not in str(opp._status) and "FRZ" not in str(opp._status):
                 move_score *= 50/(opp_max_damage+1)
+                print(f"\t- {move_score:.2f}")
             if move_damage > opp._current_hp:
-                move_score = MAX_WEIGHT*me_outspeed_tag*(1-is_switch)
+                move_is_free = me_outspeed_tag+int("FRZ" in str(opp._status))+int("SLP" in str(opp._status))
+                move_score += MAX_WEIGHT*move_is_free*(1-is_switch)
+                print(f"\t- {move_score:.2f}")
             elif move._id == "hyperbeam":
                 move_score *= 0.1
+                print(f"\t- {move_score:.2f}")
 
             if debug:
-                print(f"\t{move._id}: [{move_damage}, {move_side_effect_value}, {opp_max_damage}, {move_score}]")
+                print(f"\t{move._id} (move_damage: {move_damage:.2f}, move_side_effect_value: {move_side_effect_value}, move_acc: {move_acc:.2f}, move_recoil: {move_recoil:.2f}, move_score: {move_score:.2f})")
             move_score_data = [move, move_score]
             me_moves_score.append(move_score_data)
 
@@ -257,12 +263,10 @@ class ProactivePlayer(Player):
             return opp_max_damage
         
         for move_id in movesetUsage[opp.species]:
-            #begin{bug}
             if len(battle.available_moves) > 1:
                 move_info = battle.available_moves[0]._moves_dict[move_id]
             else: 
-                return 0
-            #end{bug}
+                move_info = list(battle.available_switches[0]._moves.values())[0]._moves_dict[move_id]
 
             category = move_info["category"]
             if category == "Physical":

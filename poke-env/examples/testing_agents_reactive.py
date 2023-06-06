@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from poke_env.player import RandomPlayer, ReactivePlayer, ProactivePlayer
+from poke_env.player import RandomPlayer, ReactivePlayer
 from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
 
 
@@ -109,7 +109,7 @@ async def main():
         battle_format="gen1ou", 
         team=team_1)
     
-    reactive_player = ProactivePlayer(
+    reactive_player = ReactivePlayer(
         player_configuration=PlayerConfiguration("aasmaClient0", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 

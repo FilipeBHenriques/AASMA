@@ -116,7 +116,7 @@ async def main():
         team=team_2)
     start = time.time()
 
-    n_battles = 1
+    n_battles = 10
     for _ in range(n_battles):
         await proactive_player.battle_against(random_player, 1)
 
