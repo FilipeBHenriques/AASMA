@@ -194,8 +194,8 @@ class ProactivePlayer(Player):
             move_recovery = 0
             if move._id == "recover" or move._id == "softboiled":
                 move_recovery = 50
-                if opp_max_damage < move_recovery and me_current_hp < 66:
-                    move_side_effect_value = 75
+                if opp_max_damage < move_recovery and me_current_hp < 55:
+                    move_side_effect_value = MAX_WEIGHT
 
             move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
             print(f"\t- {move_score:.2f}")
