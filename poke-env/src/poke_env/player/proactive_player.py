@@ -290,7 +290,7 @@ class ProactivePlayer(Player):
                 type_effectiveness *= type_chart[me._type_2.name][move_type]
 
             move_damage = self.calculate_damage(100, attack_stat, defense_stat, base_power, stab, type_effectiveness)
-            move_damage = move_damage/me._current_hp*100
+            move_damage = move_damage/me.max_hp*100
             if move_damage > opp_max_damage:
                 opp_max_damage = move_damage
         
