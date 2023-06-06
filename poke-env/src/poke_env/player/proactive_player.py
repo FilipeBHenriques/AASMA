@@ -43,9 +43,8 @@ sideEffects = {}
 sideEffects["FRZ"] = ["blizzard", "icebeam"]
 sideEffects["SLP"] = ["sing", "sleeppowder", "hypnosis", "lovelykiss"]
 sideEffects["PAR"] = ["thunderwave", "stunspore", "thunderbolt", "thunder", "bodyslam"]
-sideEffects["BRN"] = ["firblast"]
+sideEffects["BRN"] = ["fireblast"]
 sideEffects["PSN"] = ["toxic"]
-
 
 class ProactivePlayer(Player):
     def choose_move(self, battle) -> BattleOrder:
