@@ -110,15 +110,16 @@ async def main():
         team=team_1)
     
     proactive_player = ProactivePlayer(
-        player_configuration=PlayerConfiguration("aasmaClient0", "password"),
+        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
         team=team_2)
     start = time.time()
 
-    n_battles = 6
+    n_battles = 100
     for _ in range(n_battles):
         await proactive_player.battle_against(random_player, 1)
+        time.sleep(5)
 
     print(
         "%s won %d / %d battles [this took %f seconds]"

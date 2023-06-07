@@ -14,7 +14,10 @@ class ReactivePlayer(Player):
             return BattleOrder(self.find_best_switch(battle))
         best_move, move_dmg = self.find_strongest_attack_move(battle, battle.available_moves)
         if move_dmg == 0:
-            return BattleOrder(self.find_best_switch(battle))
+            if len(battle.available_switches) == 0:
+                return self.choose_random_singles_move(battle)
+            else:
+                return BattleOrder(self.find_best_switch(battle))
         return BattleOrder(best_move)
 
     def find_strongest_attack_move(self, battle, moves):

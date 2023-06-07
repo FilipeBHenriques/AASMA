@@ -126,7 +126,6 @@ class PlayerNetwork(ABC):
         ), f"Expected player {self._username} to be logged in."
         await self._set_team()
         await self._send_message(f"/challenge {username}, {format_}")
-        print("Enviei Challenge para " + username)
 
     async def _change_avatar(self, avatar_id: Optional[int]) -> None:
         """Changes the player's avatar.
