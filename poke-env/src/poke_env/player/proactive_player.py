@@ -11,7 +11,7 @@ from poke_env.environment.pokemon_type import PokemonType
 from poke_env.environment.move import Move
 
 MAX_WEIGHT = 2048
-debug = 1
+debug = 0
 
 movesetUsage = {}
 movesetUsage["snorlax"]     = ["bodyslam", "selfdestruct", "earthquake", "hyperbeam", "reflect", "rest", "amnesia", 
@@ -25,7 +25,7 @@ movesetUsage["alakazam"]    = ["thunderwave", "psychic", "seismictoss", "recover
 movesetUsage["starmie"]     = ["thunderwave", "blizzard", "recover", "thunderbolt", "psychic"]
 movesetUsage["jynx"]        = ["lovelykiss", "blizzard", "psychic", "rest"]
 movesetUsage["zapdos"]      = ["thunderbolt", "drillpeck", "thunderwave", "agility", "thunder", "rest"]
-movesetUsage["rhydon"]      = ["earthequake", "substitute", "rockslide", "bodyslam"]
+movesetUsage["rhydon"]      = ["earthquake", "substitute", "rockslide", "bodyslam"]
 movesetUsage["lapras"]      = ["blizzard", "thunderbolt", "confuseray", "sing", "bodyslam", "hyperbeam", "icebeam", 
                                "rest"]
 movesetUsage["gengar"]      = ["hypnosis", "explosion", "nightshade", "thunderbolt", "seismictoss", "megadrain", 
@@ -124,7 +124,7 @@ class ProactivePlayer(Player):
 
         me_current_hp = (me._current_hp/me.max_hp)*100-(1+me_outspeed_tag)*opp_max_damage*is_switch
         if debug:
-            print(f"{me.species}'s moves score (me_current_hp: {me_current_hp:.2f}, opp_max_damage: {opp_max_damage:.2f}, me_outspeed_tag: {me_outspeed_tag}):")
+            print(f"{me.species}'s moves score (me_current_hp: {me_current_hp:.2f}, opp_max_damage: {opp_max_damage:.2f}, me_outspeed_tag: {me_outspeed_tag}, me_recovery_tag: {me_recovery_tag}):")
         
         for move in available_moves:
             move_info = move._moves_dict[move._id]
@@ -215,15 +215,14 @@ class ProactivePlayer(Player):
                 if opp_max_damage < move_recovery and me_current_hp < 66:
                     move_side_effect_value = MAX_WEIGHT
             elif move._id == "rest":
-                move_recovery = 100/3
-                if opp_max_damage < move_recovery and me_current_hp < 50:
+                if opp_max_damage < me_current_hp and me_current_hp < 40:
                     move_side_effect_value = MAX_WEIGHT
 
             move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
             if me_recovery_tag == 1 and "SLP" not in str(opp._status) and "FRZ" not in str(opp._status):
                 move_score *= 50/(opp_max_damage+1)
             if move_damage > opp._current_hp:
-                move_is_free = me_outspeed_tag+int("FRZ" in str(opp._status))+int("SLP" in str(opp._status))
+                move_is_free = me_outspeed_tag+int(opp_max_damage < me_current_hp)+int("FRZ" in str(opp._status))+int("SLP" in str(opp._status))
                 move_score += MAX_WEIGHT*move_is_free*(1-is_switch)+100/move_info["basePower"]
             elif move._id == "hyperbeam":
                 move_score *= 0.1
@@ -334,7 +333,7 @@ class ProactivePlayer(Player):
         return opp_max_damage
 
     def calculate_damage(self, level, attack_stat, defense_stat, base_power, stab, type_effectiveness):
-        damage = (((2*level)/5+2)*base_power*attack_stat/defense_stat)/50+2
+        damage = (((2*level)/5+2)*base_power*attack_stat/(defense_stat+1))/50+2
         damage *= stab
         damage *= type_effectiveness
         return int(damage)
