@@ -194,21 +194,21 @@ class ProactivePlayer(Player):
             move_recovery = 0
             if move._id == "recover" or move._id == "softboiled":
                 move_recovery = 50
-                if opp_max_damage < move_recovery and me_current_hp < 55:
+                if opp_max_damage < move_recovery and me_current_hp < 66:
+                    move_side_effect_value = MAX_WEIGHT
+            elif move._id == "rest":
+                move_recovery = 100
+                if opp_max_damage < move_recovery and me_current_hp < 50:
                     move_side_effect_value = MAX_WEIGHT
 
             move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
-            print(f"\t- {move_score:.2f}")
             if me_recovery_tag == 1 and "SLP" not in str(opp._status) and "FRZ" not in str(opp._status):
                 move_score *= 50/(opp_max_damage+1)
-                print(f"\t- {move_score:.2f}")
             if move_damage > opp._current_hp:
                 move_is_free = me_outspeed_tag+int("FRZ" in str(opp._status))+int("SLP" in str(opp._status))
-                move_score += MAX_WEIGHT*move_is_free*(1-is_switch)
-                print(f"\t- {move_score:.2f}")
+                move_score += MAX_WEIGHT*move_is_free*(1-is_switch)+100/move_info["basePower"]
             elif move._id == "hyperbeam":
                 move_score *= 0.1
-                print(f"\t- {move_score:.2f}")
 
             if debug:
                 print(f"\t{move._id} (move_damage: {move_damage:.2f}, move_side_effect_value: {move_side_effect_value}, move_acc: {move_acc:.2f}, move_recoil: {move_recoil:.2f}, move_score: {move_score:.2f})")
@@ -259,7 +259,7 @@ class ProactivePlayer(Player):
 
     def opp_max_damage(self, battle, me, opp, type_chart):
         opp_max_damage = 0
-        if "SLP" in str(opp._status) or "FRZ" in str(opp._status):
+        if "SLP" in str(opp._status) or "FRZ" in str(opp._status) or opp.must_recharge:
             return opp_max_damage
         
         for move_id in movesetUsage[opp.species]:
