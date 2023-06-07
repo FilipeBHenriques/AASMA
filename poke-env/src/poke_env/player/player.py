@@ -39,6 +39,7 @@ from poke_env.teambuilder.teambuilder import Teambuilder
 from poke_env.teambuilder.constant_teambuilder import ConstantTeambuilder
 from poke_env.data import GenData, to_id_str
 
+from poke_env.teambuilder.gen1ou_team import Team
 
 class Player(PlayerNetwork, ABC):
     """
@@ -56,7 +57,7 @@ class Player(PlayerNetwork, ABC):
         player_configuration: Optional[PlayerConfiguration] = None,
         *,
         avatar: Optional[int] = None,
-        battle_format: str = "gen8randombattle",
+        battle_format: str = "gen1ou",
         log_level: Optional[int] = None,
         max_concurrent_battles: int = 1,
         save_replays: Union[bool, str] = False,
@@ -65,7 +66,7 @@ class Player(PlayerNetwork, ABC):
         start_listening: bool = True,
         ping_interval: Optional[float] = 20.0,
         ping_timeout: Optional[float] = 20.0,
-        team: Optional[Union[str, Teambuilder]] = None,
+        team: Optional[Union[str, Teambuilder]] = Team.pick_random_team(),
     ) -> None:
         """
         :param player_configuration: Player configuration. If empty, defaults to an

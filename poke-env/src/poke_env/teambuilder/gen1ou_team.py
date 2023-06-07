@@ -1,11 +1,7 @@
-import asyncio
-import time
+import random
 
-from poke_env.player import RandomPlayer, ProactivePlayer
-from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
-
-
-team_1 = """
+teams = {}
+teams[0] = """
 Starmie  
 Ability: none  
 EVs: 252 HP / 252 Def / 252 SpA / 252 SpD / 252 Spe  
@@ -55,7 +51,7 @@ Ability: none
 - Earthquake  
 """
 
-team_2 = """
+teams[1] = """
 Gengar  
 Ability: none  
 - Hypnosis  
@@ -101,30 +97,57 @@ Ability: none
 - Earthquake  
 """
 
-async def main():
-    # We create two players.
-    random_player = RandomPlayer(
-        player_configuration=PlayerConfiguration("random-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=team_1)
-    
-    proactive_player = ProactivePlayer(
-        player_configuration=PlayerConfiguration("aasmaClient0", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=team_2)
-    start = time.time()
+teams[2] = """
+Jynx  
+Ability: Oblivious  
+EVs: 252 HP / 252 Def / 252 SpA / 252 SpD / 252 Spe  
+IVs: 2 Atk  
+- Lovely Kiss  
+- Blizzard  
+- Psychic  
+- Rest  
 
-    n_battles = 6
-    for _ in range(n_battles):
-        await proactive_player.battle_against(random_player, 1)
+Starmie  
+Ability: Illuminate  
+EVs: 252 HP / 252 Def / 252 SpA / 252 SpD / 252 Spe  
+IVs: 2 Atk  
+- Psychic  
+- Blizzard  
+- Thunder Wave  
+- Recover  
 
-    print(
-        "%s won %d / %d battles [this took %f seconds]"
-        % ("Reactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
-    )
+Jolteon  
+Ability: Volt Absorb  
+- Thunderbolt  
+- Thunder Wave  
+- Double Kick  
+- Rest  
 
+Chansey  
+Ability: Natural Cure  
+EVs: 252 HP / 252 Def / 252 SpA / 252 SpD / 252 Spe  
+IVs: 2 Atk  
+- Ice Beam  
+- Thunderbolt  
+- Counter  
+- Soft-Boiled  
 
-if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(main())
+Snorlax  
+Ability: Immunity  
+- Amnesia  
+- Ice Beam  
+- Reflect  
+- Rest  
+
+Tauros  
+Ability: Intimidate  
+- Body Slam  
+- Hyper Beam  
+- Blizzard  
+- Fire Blast 
+"""
+
+class Team():
+    def pick_random_team():
+        i = random.randint(0, 2)
+        return teams[i]

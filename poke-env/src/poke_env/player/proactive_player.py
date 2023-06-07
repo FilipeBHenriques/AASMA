@@ -11,7 +11,7 @@ from poke_env.environment.pokemon_type import PokemonType
 from poke_env.environment.move import Move
 
 MAX_WEIGHT = 2048
-debug = 0
+debug = 1
 
 movesetUsage = {}
 movesetUsage["snorlax"]     = ["bodyslam", "selfdestruct", "earthquake", "hyperbeam", "reflect", "rest", "amnesia", 
@@ -219,9 +219,7 @@ class ProactivePlayer(Player):
                 if opp_max_damage < move_recovery and me_current_hp < 50:
                     move_side_effect_value = MAX_WEIGHT
 
-            opp_fainted_teammates = self.fainted_teammates(battle.opponent_team.values())
-
-            move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage*(1+50/(opp_fainted_teammates+1))+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
+            move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
             if me_recovery_tag == 1 and "SLP" not in str(opp._status) and "FRZ" not in str(opp._status):
                 move_score *= 50/(opp_max_damage+1)
             if move_damage > opp._current_hp:
@@ -340,11 +338,3 @@ class ProactivePlayer(Player):
         damage *= stab
         damage *= type_effectiveness
         return int(damage)
-
-    def fainted_teammates(self, team_values):
-        fainted_teammates = 0
-        for pokemon in team_values:
-            if "FNT" in str(pokemon._status):
-                fainted_teammates += 1
-        
-        return fainted_teammates
