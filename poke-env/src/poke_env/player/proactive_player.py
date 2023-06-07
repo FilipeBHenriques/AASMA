@@ -11,7 +11,7 @@ from poke_env.environment.pokemon_type import PokemonType
 from poke_env.environment.move import Move
 
 MAX_WEIGHT = 2048
-debug = 1
+debug = 0
 
 movesetUsage = {}
 movesetUsage["snorlax"]     = ["bodyslam", "selfdestruct", "earthquake", "hyperbeam", "reflect", "rest", "amnesia", 
@@ -140,11 +140,29 @@ class ProactivePlayer(Player):
                 else:
                     if category == "Physical":
                         attack_stat = floor((me.base_stats["atk"]+15)*2+252/4)+5
+                        attack_stat_modifier = (me._boosts["atk"]+2)/2
+                        if attack_stat_modifier < 0:
+                            attack_stat_modifier = abs(1/attack_stat_modifier)
+                        attack_stat *= attack_stat_modifier
+
                         defense_stat = floor((opp.base_stats["def"]+15)*2+252/4)+5
-                        
+                        defense_stat_modifier = (opp._boosts["def"]+2)/2
+                        if defense_stat_modifier < 0:
+                            defense_stat_modifier = abs(1/defense_stat_modifier)
+                        defense_stat *= defense_stat_modifier
+
                     else:
                         attack_stat = floor((me.base_stats["spa"]+15)*2+252/4)+5
+                        attack_stat_modifier = (me._boosts["spa"]+2)/2
+                        if attack_stat_modifier < 0:
+                            attack_stat_modifier = abs(1/attack_stat_modifier)
+                        attack_stat *= attack_stat_modifier
+
                         defense_stat = floor((opp.base_stats["spd"]+15)*2+252/4)+5
+                        defense_stat_modifier = (opp._boosts["spd"]+2)/2
+                        if defense_stat_modifier < 0:
+                            defense_stat_modifier = abs(1/defense_stat_modifier)
+                        defense_stat *= defense_stat_modifier
 
                     move_type = move_info["type"].upper()
                     if move_type == me._type_1.name:
@@ -197,11 +215,13 @@ class ProactivePlayer(Player):
                 if opp_max_damage < move_recovery and me_current_hp < 66:
                     move_side_effect_value = MAX_WEIGHT
             elif move._id == "rest":
-                move_recovery = 100
+                move_recovery = 100/3
                 if opp_max_damage < move_recovery and me_current_hp < 50:
                     move_side_effect_value = MAX_WEIGHT
 
-            move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
+            opp_fainted_teammates = self.fainted_teammates(battle.opponent_team.values())
+
+            move_score = max(me_current_hp-opp_max_damage, 1)/100*(1+me_outspeed_tag)*(move_damage*(1+50/(opp_fainted_teammates+1))+move_side_effect_value)*move_acc/min(opp_max_damage+move_recoil+1, 100)
             if me_recovery_tag == 1 and "SLP" not in str(opp._status) and "FRZ" not in str(opp._status):
                 move_score *= 50/(opp_max_damage+1)
             if move_damage > opp._current_hp:
@@ -271,10 +291,29 @@ class ProactivePlayer(Player):
             category = move_info["category"]
             if category == "Physical":
                 attack_stat = floor((opp.base_stats["atk"]+15)*2+252/4)+5
+                attack_stat_modifier = (opp._boosts["atk"]+2)/2
+                if attack_stat_modifier < 0:
+                    attack_stat_modifier = abs(1/attack_stat_modifier)
+                attack_stat *= attack_stat_modifier
+
                 defense_stat = floor((me.base_stats["def"]+15)*2+252/4)+5
+                defense_stat_modifier = (me._boosts["def"]+2)/2
+                if defense_stat_modifier < 0:
+                    defense_stat_modifier = abs(1/defense_stat_modifier)
+                defense_stat *= defense_stat_modifier
+
             elif category == "Special":
                 attack_stat = floor((opp.base_stats["spa"]+15)*2+252/4)+5
+                attack_stat_modifier = (opp._boosts["spa"]+2)/2
+                if attack_stat_modifier < 0:
+                    attack_stat_modifier = abs(1/attack_stat_modifier)
+                attack_stat *= attack_stat_modifier
+
                 defense_stat = floor((me.base_stats["spd"]+15)*2+252/4)+5
+                defense_stat_modifier = (me._boosts["spd"]+2)/2
+                if defense_stat_modifier < 0:
+                    defense_stat_modifier = abs(1/defense_stat_modifier)
+                defense_stat *= defense_stat_modifier
             else:
                 continue
             base_power = move_info["basePower"]
@@ -301,3 +340,11 @@ class ProactivePlayer(Player):
         damage *= stab
         damage *= type_effectiveness
         return int(damage)
+
+    def fainted_teammates(self, team_values):
+        fainted_teammates = 0
+        for pokemon in team_values:
+            if "FNT" in str(pokemon._status):
+                fainted_teammates += 1
+        
+        return fainted_teammates
