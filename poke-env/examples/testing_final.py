@@ -161,9 +161,16 @@ async def main():
     start = time.time()
     await main_battle(proactive_player, reactive_player, n_battles)
     
+    print("##########################################################################################")
+
     print(
         "%s won %d / %d battles against the Reactive Player [this took %f seconds]"
         % ("Proactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
+    )
+
+    print(
+        "%s won %d / %d battles against the Proactive Player [this took %f seconds]"
+        % ("Reactive Player", reactive_player.n_won_battles, n_battles, time.time() - start)
     )
 
 if __name__ == "__main__":
