@@ -116,9 +116,21 @@ async def main():
         team=team_2)
     start = time.time()
 
-    n_battles = 1
+    n_battles = 200
+    n = 0
+    threshold = time.time()
     for _ in range(n_battles):
-        await reactive_player.battle_against(random_player, 1)
+        if n == 5 and (time.time() - threshold) < 181:
+            print(time.time() - threshold)
+            time.sleep(200 - (time.time() - threshold))
+            n = 0
+            threshold = time.time()
+        elif n == 5:
+            n = 0
+            threshold = time.time()
+        else:    
+            await reactive_player.battle_against(random_player, 1)
+            n+=1
 
     print(
         "%s won %d / %d battles [this took %f seconds]"
