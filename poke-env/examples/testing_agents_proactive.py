@@ -104,13 +104,13 @@ Ability: none
 async def main():
     # We create two players.
     random_player = RandomPlayer(
-        player_configuration=PlayerConfiguration("aasmaClient1", "password"),
+        player_configuration=PlayerConfiguration("random-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
         team=team_1)
     
     proactive_player = ProactivePlayer(
-        player_configuration=PlayerConfiguration("aasmaClient0", "password"),
+        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
         team=team_2)

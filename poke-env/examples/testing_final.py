@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from poke_env.player import RandomPlayer, ReactivePlayer
+from poke_env.player import RandomPlayer, ReactivePlayer, ProactivePlayer
 from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
 
 
@@ -101,22 +101,7 @@ Ability: none
 - Earthquake  
 """
 
-async def main():
-    # We create two players.
-    random_player = RandomPlayer(
-        player_configuration=PlayerConfiguration("random-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=team_1)
-    
-    reactive_player = ReactivePlayer(
-        player_configuration=PlayerConfiguration("reactive-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=team_2)
-    start = time.time()
-
-    n_battles = 200
+async def main_battle(player1, player2, n_battles):
     n = 0
     threshold = time.time()
     for _ in range(n_battles):
@@ -129,14 +114,63 @@ async def main():
             n = 0
             threshold = time.time()
         else:    
-            await reactive_player.battle_against(random_player, 1)
+            await player1.battle_against(player2, 1)
             n+=1
 
+async def main():
+    n_battles = 1
+    # We create three players.
+    random_player = RandomPlayer(
+        player_configuration=PlayerConfiguration("random-agnt", "password"),
+        server_configuration=LocalhostServerConfiguration,
+        battle_format="gen1ou", 
+        team=team_1)
+    
+    reactive_player = ReactivePlayer(
+        player_configuration=PlayerConfiguration("reactive-agnt", "password"),
+        server_configuration=LocalhostServerConfiguration,
+        battle_format="gen1ou", 
+        team=team_2)
+    
+    proactive_player = ProactivePlayer(
+        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
+        server_configuration=LocalhostServerConfiguration,
+        battle_format="gen1ou", 
+        team=team_2)
+    
+    start = time.time()
+    await main_battle(reactive_player, random_player, n_battles)
     print(
-        "%s won %d / %d battles [this took %f seconds]"
+        "%s won %d / %d battles against the RandomPlayer [this took %f seconds]"
         % ("Reactive Player", reactive_player.n_won_battles, n_battles, time.time() - start)
     )
 
+    ##########################################################################################
+
+    start = time.time()
+    await main_battle(proactive_player, random_player, n_battles)
+    print(
+        "%s won %d / %d battles against the RandomPlayer [this took %f seconds]"
+        % ("Proactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
+    )
+
+    ##########################################################################################
+
+    reactive_player.reset_battles()
+    proactive_player.reset_battles()
+    start = time.time()
+    await main_battle(proactive_player, reactive_player, n_battles)
+    
+    print(
+        "%s won %d / %d battles against the Reactive Player [this took %f seconds]"
+        % ("Proactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
+    )
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
+
+
+
+    
+        
+        

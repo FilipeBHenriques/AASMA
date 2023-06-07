@@ -416,13 +416,6 @@ class Player(PlayerNetwork, ABC):
                     break
         await self._battle_count_queue.join()
 
-    def getAllMovesTeam(self, battle:Battle):
-        all_moves = []
-        all_moves.append((battle.active_pokemon.species, battle.available_moves))
-        for poke_benched in battle.available_switches:
-            all_moves.append((poke_benched.species, poke_benched._moves))
-        return all_moves
-
     def getWeaknesses(self, battle:Battle):
         opp = battle.opponent_active_pokemon                                                                                                                                                                 
         types = ['BUG', 'DRAGON', 'ELECTRIC', 'FIGHTING', 'FIRE', 'FLYING', 'GHOST',                             
