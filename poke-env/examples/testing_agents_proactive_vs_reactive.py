@@ -11,7 +11,7 @@ if len(sys.argv) > 1:
 else:
     print("No integer provided as an argument.")
 
-from poke_env.player import RandomPlayer, ReactivePlayer
+from poke_env.player import RandomPlayer, ProactivePlayer
 from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
 from poke_env.teambuilder.gen1ou_team import Team
 
@@ -61,21 +61,21 @@ async def main():
         battle_format="gen1ou", 
         team=Team.pick_random_team())
     
-    reactive_player = ReactivePlayer(
-        player_configuration=PlayerConfiguration("reactive-agnt", "password"),
+    proactive_player = ProactivePlayer(
+        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
         team=Team.pick_random_team())
-    start = time.time()
-    reactive_metrics = await main_battle(reactive_player, random_player, n_battles)
 
+    start = time.time()
+    proactive_metrics = await main_battle(proactive_player, random_player, n_battles)
     print(
-        "\n%s won %d / %d battles [this took %f seconds]"
-        % ("Reactive Player", reactive_player.n_won_battles, n_battles, time.time() - start)
+        "\n%s won %d / %d battles against the Random Player [this took %f seconds]"
+        % ("Proactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
     )
 
-    print("\nMetrics for Reactive Player against Random Player:")
-    print_dict(reactive_metrics)
+    print("\nMetrics for Proactive Player against RandomPlayer:")
+    print_dict(proactive_metrics)
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
