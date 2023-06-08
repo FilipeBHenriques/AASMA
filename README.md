@@ -11,7 +11,7 @@ We implemented 3 variants of agents that play pokemon showdown locally against e
 
 ## Requirements and How to install
 - git clone https://github.com/FilipeBHenriques/AASMA.git
-- Install NodeJS https://nodejs.org/en/download
+- Install NodeJS https://nodejs.org/en/download (version 18.16)
 - Install Python3 3.10.0+
 - cd AASMA; pip install -e poke-env
 
