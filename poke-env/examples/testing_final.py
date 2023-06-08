@@ -8,8 +8,8 @@ from poke_env.teambuilder.gen1ou_team import Team
 def print_dict(dict):
     win_rate = dict["win_rate"]*100
     print(f"Win Rate: {win_rate:.2f} %")
-    print("Average Number of Turns: " + str(int(dict["battle_duration_avg"])) + " turns")
-    print("Average Pokemon alive: " + str(int(dict["pokemon_alive_avg"])))
+    print("Average Number of Turns: " + str(float(dict["battle_duration_avg"])) + " turns")
+    print("Average Pokemon alive: " + str(float(dict["pokemon_alive_avg"])))
 
 async def main_battle(player1, player2, n_battles):
     n = 0
@@ -18,8 +18,7 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total = 0
     for _ in range(n_battles):
         if n == 5 and (time.time() - threshold) < 181:
-            print(time.time() - threshold)
-            time.sleep(200 - (time.time() - threshold))
+            time.sleep(210 - (time.time() - threshold))
             n = 0
             threshold = time.time()
         elif n == 5:
@@ -27,24 +26,27 @@ async def main_battle(player1, player2, n_battles):
             threshold = time.time()
         else:
             await player1.battle_against(player2, 1)
-            for battle in player1._battles.values():
-                battle_duration_total += battle._turn
-                pokemon_alive = len(battle.available_switches)
-                if "FNT" not in str(battle.active_pokemon._status):
-                    pokemon_alive += 1
-                pokemon_alive_total += pokemon_alive
             n += 1
 
+    for battle in player1._battles.values():
+        print(battle._turn)
+        battle_duration_total += battle._turn
+        pokemon_alive = len(battle.available_switches)
+        if "FNT" not in str(battle.active_pokemon._status):
+            pokemon_alive += 1
+        pokemon_alive_total += pokemon_alive
+        print(pokemon_alive_total)
+    
     metrics = {
         "win_rate": player1.n_won_battles / n_battles,
-        "battle_duration_avg": battle_duration_total / n_battles,
-        "pokemon_alive_avg": pokemon_alive_total / n_battles
+        "battle_duration_avg": float(battle_duration_total / n_battles),
+        "pokemon_alive_avg": float(pokemon_alive_total / n_battles)
     }
 
     return metrics
 
 async def main():
-    n_battles = 1
+    n_battles = 2
     # We create three players.
     random_player = RandomPlayer(
         player_configuration=PlayerConfiguration("random-agnt", "password"),
