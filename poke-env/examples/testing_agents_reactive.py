@@ -1,19 +1,20 @@
 import asyncio
 import time
 import sys
+
+from poke_env.player import RandomPlayer, ReactivePlayer
+from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
+from poke_env.teambuilder.gen1ou_team import Team
+
+n_battles = 0
 if len(sys.argv) > 1:
     try:
         n_battles = int(sys.argv[1])
-        # Use the 'num' variable here for further processing
-        print("Received integer:", n_battles)
     except ValueError:
         print("Invalid integer provided.")
 else:
     print("No integer provided as an argument.")
 
-from poke_env.player import RandomPlayer, ReactivePlayer
-from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
-from poke_env.teambuilder.gen1ou_team import Team
 
 def print_dict(dict):
     win_rate = dict["win_rate"]*100

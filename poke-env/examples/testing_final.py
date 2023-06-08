@@ -1,9 +1,19 @@
 import asyncio
 import time
+import sys
 
 from poke_env.player import RandomPlayer, ReactivePlayer, ProactivePlayer
 from poke_env import LocalhostServerConfiguration, PlayerConfiguration
 from poke_env.teambuilder.gen1ou_team import Team
+
+n_battles = 0
+if len(sys.argv) > 1:
+    try:
+        n_battles = int(sys.argv[1])
+    except ValueError:
+        print("Invalid integer provided.")
+else:
+    print("No integer provided as an argument.")
 
 def print_dict(dict):
     win_rate = dict["win_rate"]*100
@@ -50,7 +60,6 @@ async def main_battle(player1, player2, n_battles):
     return metrics
 
 async def main():
-    n_battles = 500
     # We create three players.
     random_player = RandomPlayer(
         player_configuration=PlayerConfiguration("random-agnt", "password"),
