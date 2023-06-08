@@ -2,7 +2,7 @@ import asyncio
 import time
 import sys
 
-from poke_env.player import ReactivePlayer, ProactivePlayer
+from poke_env.player import RandomPlayer, ProactivePlayer
 from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
 from poke_env.teambuilder.gen1ou_team import Team
 
@@ -55,8 +55,8 @@ async def main_battle(player1, player2, n_battles):
 
 async def main():
     # We create two players.
-    reactive_player = ReactivePlayer(
-        player_configuration=PlayerConfiguration("reactive-agnt", "password"),
+    random_player = RandomPlayer(
+        player_configuration=PlayerConfiguration("random-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
         team=Team.pick_random_team())
@@ -68,13 +68,13 @@ async def main():
         team=Team.pick_random_team())
 
     start = time.time()
-    proactive_metrics = await main_battle(proactive_player, reactive_player, n_battles)
+    proactive_metrics = await main_battle(proactive_player, random_player, n_battles)
     print(
-        "\n%s won %d / %d battles against the Reactive Player [this took %f seconds]"
+        "\n%s won %d / %d battles against the Random Player [this took %f seconds]"
         % ("Proactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
     )
 
-    print("\nMetrics for Proactive Player against Reactive Player:")
+    print("\nMetrics for Proactive Player against Random Player:")
     print_dict(proactive_metrics)
 
 if __name__ == "__main__":
