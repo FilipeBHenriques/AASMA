@@ -6,7 +6,7 @@
 
 We implemented 3 variants of agents that play pokemon showdown locally against each other.
 - A **Random Agent**, that makes random moves/switches and it's our baseline to evaluate the performance of the remaining agents. 
-- A **Reactive Agent**, that attempts to inflict the maximum dmg to the opponent, if he can't cause damage he switches to the pokemon that has the highest damage against the opponent. 
+- A **Reactive Agent**, that attempts to inflict the maximum damage to the opponent in each turn, if he can't cause damage he switches to the pokemon that has the highest damage against the opponent. 
 - A **Proactive Agent**, takes into account the opponents available actions and the game plan, and aims to position itself advantageously for future turns. 
 
 ## Requirements and How to install
