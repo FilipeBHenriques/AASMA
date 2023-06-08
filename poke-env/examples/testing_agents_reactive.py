@@ -12,14 +12,11 @@ def print_dict(dict):
     print("Average Pokemon alive: " + str(float(dict["pokemon_alive_avg"])))
 
 async def main_battle(player1, player2, n_battles):
-    battle_number = 0
     n = 0
     threshold = time.time()
     battle_duration_total = 0
     pokemon_alive_total = 0
     for _ in range(n_battles):
-        if battle_number % 50 == 0:
-            print(str(battle_number) + "/" + str(n_battles))
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0
@@ -29,17 +26,14 @@ async def main_battle(player1, player2, n_battles):
             threshold = time.time()
         else:
             await player1.battle_against(player2, 1)
-            n += 1
-        battle_number+=1     
+            n += 1   
 
     for battle in player1._battles.values():
-        print(battle._turn)
         battle_duration_total += battle._turn
         pokemon_alive = len(battle.available_switches)
         if "FNT" not in str(battle.active_pokemon._status):
             pokemon_alive += 1
         pokemon_alive_total += pokemon_alive
-        print(pokemon_alive_total)
     
     metrics = {
         "win_rate": player1.n_won_battles / n_battles,
