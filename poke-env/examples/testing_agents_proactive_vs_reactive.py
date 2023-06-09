@@ -58,24 +58,25 @@ async def main_battle(player1, player2, n_battles):
             n = 0
             threshold = time.time()
         else:
-            await player1.battle_against(player2, 1)
-            if player1.n_won_battles == 1:
-                wins += 1
-            elif player2.n_won_battles == 1:
-                loses += 1
-            else:
-                draws +=1
-            for battle in player1._battles.values():
-                battle_duration_total += battle._turn
-                pokemon_alive = len(battle.available_switches)
-                if "FNT" not in str(battle.active_pokemon._status):
-                    pokemon_alive += 1
-                pokemon_alive_total += pokemon_alive
-            for battle in player2._battles.values():
-                pokemon_alive_total_opp += len(battle.available_switches)
-                if "FNT" not in str(battle.active_pokemon._status):
-                    pokemon_alive_total_opp += 1
             n += 1
+        await player1.battle_against(player2, 1)
+        if player1.n_won_battles == 1:
+            wins += 1
+        elif player2.n_won_battles == 1:
+            loses += 1
+        else:
+            draws +=1
+        for battle in player1._battles.values():
+            battle_duration_total += battle._turn
+            pokemon_alive = len(battle.available_switches)
+            if "FNT" not in str(battle.active_pokemon._status):
+                pokemon_alive += 1
+            pokemon_alive_total += pokemon_alive
+        for battle in player2._battles.values():
+            pokemon_alive_total_opp += len(battle.available_switches)
+            if "FNT" not in str(battle.active_pokemon._status):
+                pokemon_alive_total_opp += 1
+
         if handicap_reactive == 0:
             test_team_reactive = Team.pick_random_team()
         else:

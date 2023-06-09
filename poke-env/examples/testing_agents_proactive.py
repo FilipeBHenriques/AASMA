@@ -54,6 +54,7 @@ async def main_battle(player1, player2, n_battles):
             n = 0
             threshold = time.time()
         else:
+            n += 1
             await player1.battle_against(player2, 1)
             if player1.n_won_battles == 1:
                 wins += 1
@@ -71,7 +72,7 @@ async def main_battle(player1, player2, n_battles):
                 pokemon_alive_total_opp += len(battle.available_switches)
                 if "FNT" not in str(battle.active_pokemon._status):
                     pokemon_alive_total_opp += 1
-            n += 1
+                    
         if handicap == 0:
             test_team_proactive = Team.pick_random_team()
         else:
