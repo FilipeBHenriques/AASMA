@@ -76,13 +76,7 @@ async def main_battle(player1, player2, n_battles):
         if handicap == 0:
             test_team_proactive = Team.pick_random_team()
         else:
-            test_team_proactive = Team.pick_random_handicap_team(handicap)
-        
-        player1 = ProactivePlayer(
-        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=test_team_proactive)    
+            test_team_proactive = Team.pick_random_handicap_team(handicap)   
 
         player2.reset_battles()
         player1.reset_battles()
