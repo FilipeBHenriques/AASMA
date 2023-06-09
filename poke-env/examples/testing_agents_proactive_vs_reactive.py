@@ -96,7 +96,7 @@ async def main():
     )
 
     print("\nMetrics for Proactive Player against Reactive Player:")
-    print_dict(proactive_metrics_against_reactive, proactive_player._username, reactive_player._username)
+    print_dict(proactive_metrics, proactive_player._username, reactive_player._username)
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
