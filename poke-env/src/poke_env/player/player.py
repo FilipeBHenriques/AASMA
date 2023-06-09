@@ -52,12 +52,6 @@ class Player(PlayerNetwork, ABC):
     # chance of being showdown's default order to prevent infinite loops
     DEFAULT_CHOICE_CHANCE = 1 / 1000
 
-    Handicap = 0
-    if Handicap == 0:
-        test_team = Team.pick_random_team()
-    else:
-        test_team = Team.pick_random_handicap_team(Handicap)
-
     def __init__(
         self,
         player_configuration: Optional[PlayerConfiguration] = None,
@@ -72,7 +66,7 @@ class Player(PlayerNetwork, ABC):
         start_listening: bool = True,
         ping_interval: Optional[float] = 20.0,
         ping_timeout: Optional[float] = 20.0,
-        team: Optional[Union[str, Teambuilder]] = test_team,
+        team: Optional[Union[str, Teambuilder]] = Team.pick_random_team(),
 
     ) -> None:
         """
