@@ -44,6 +44,7 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total = 0
     pokemon_alive_total_opp = 0
     for _ in range(n_battles):
+        print(f"{_+1}/{n_battles}")
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0
@@ -74,6 +75,12 @@ async def main_battle(player1, player2, n_battles):
             test_team_proactive = Team.pick_random_team()
         else:
             test_team_proactive = Team.pick_random_handicap_team(handicap)
+        
+        player1 = ProactivePlayer(
+        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
+        server_configuration=LocalhostServerConfiguration,
+        battle_format="gen1ou", 
+        team=test_team_proactive)    
 
         player2 = RandomPlayer(
         player_configuration=PlayerConfiguration("random-agnt", "password"),
@@ -81,11 +88,6 @@ async def main_battle(player1, player2, n_battles):
         battle_format="gen1ou", 
         team=Team.pick_random_team())
     
-        player1 = ProactivePlayer(
-        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=test_team_proactive)    
     
     metrics = {
         "win_rate": wins / n_battles,
