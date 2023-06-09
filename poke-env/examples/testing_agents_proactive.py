@@ -117,7 +117,7 @@ async def main():
     proactive_metrics = await main_battle(proactive_player, random_player, n_battles)
     print(
         "\n%s won %d / %d battles against the Random Player [this took %f seconds]"
-        % ("Proactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
+        % ("Proactive Player", proactive_metrics["wins"], n_battles, time.time() - start)
     )
 
     print("\nMetrics for Proactive Player against Random Player:")
