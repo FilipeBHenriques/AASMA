@@ -79,7 +79,8 @@ async def main_battle(player1, player2, n_battles):
 
         player2.reset_battles()
         player1.reset_battles()
-        player1._team = ConstantTeambuilder(test_team_proactive)     
+        player1._team = ConstantTeambuilder(test_team_proactive)    
+        player1._team = ConstantTeambuilder(Team.pick_random_team())
     
     metrics = {
         "win_rate": wins / n_battles,
