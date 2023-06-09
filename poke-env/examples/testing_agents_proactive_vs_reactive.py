@@ -26,15 +26,7 @@ if len(sys.argv) > 3:
     except ValueError:
         print("Invalid integer provided.")
 
-if handicap_reactive == 0:
-    test_team_reactive = Team.pick_random_team()
-else:
-    test_team_reactive = Team.pick_random_handicap_team(handicap_reactive)
 
-if handicap_proactive == 0:
-    test_team_proactive = Team.pick_random_team()
-else:
-    test_team_proactive = Team.pick_random_handicap_team(handicap_proactive)
 
 def print_dict(dict, name1, name2):
     win_rate = dict["win_rate"]*100
@@ -54,6 +46,15 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total_opp = 0
     draws = 0
     for _ in range(n_battles):
+        if handicap_reactive == 0:
+            test_team_reactive = Team.pick_random_team()
+        else:
+            test_team_reactive = Team.pick_random_handicap_team(handicap_reactive)
+
+        if handicap_proactive == 0:
+            test_team_proactive = Team.pick_random_team()
+        else:
+            test_team_proactive = Team.pick_random_handicap_team(handicap_proactive)
         print(f"{_+1}/{n_battles}")
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
