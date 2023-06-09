@@ -35,8 +35,6 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total_opp = 0
     draws = 0
     for _ in range(n_battles):
-        if battle_number % 50 == 0:
-            print(str(battle_number) + "/" + str(n_battles))
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0

@@ -26,7 +26,6 @@ def print_dict(dict, name1, name2):
     print("Average Pokemon alive " + name2 + " : " + str(float(dict["pokemon_alive_avg_opp"])))
 
 async def main_battle(player1, player2, n_battles):
-    battle_number = 0
     n = 0
     threshold = time.time()
     battle_duration_total = 0
@@ -34,8 +33,6 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total_opp = 0
     draws = 0
     for _ in range(n_battles):
-        if battle_number % 50 == 0:
-            print(str(battle_number) + "/" + str(n_battles))
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0
@@ -47,8 +44,7 @@ async def main_battle(player1, player2, n_battles):
             battle_result = await player1.battle_against(player2, 1)
             if battle_result == "draw":
                 draws +=1
-            n += 1
-        battle_number+=1     
+            n += 1    
 
     for battle in player1._battles.values():
         battle_duration_total += battle._turn
