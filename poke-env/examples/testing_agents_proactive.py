@@ -5,6 +5,7 @@ import sys
 from poke_env.player import RandomPlayer, ProactivePlayer
 from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
 from poke_env.teambuilder.gen1ou_team import Team
+from poke_env.teambuilder.constant_teambuilder import ConstantTeambuilder
 
 n_battles = 0
 if len(sys.argv) > 1:
@@ -82,12 +83,10 @@ async def main_battle(player1, player2, n_battles):
         battle_format="gen1ou", 
         team=test_team_proactive)    
 
-        player2 = RandomPlayer(
-        player_configuration=PlayerConfiguration("random-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=Team.pick_random_team())
-    
+        player2.reset_battles()
+        player1.reset_battles()
+        player1._team = ConstantTeambuilder(test_team_proactive)
+        player2._team = ConstantTeambuilder(Team.pick_random_team())   
     
     metrics = {
         "win_rate": wins / n_battles,
