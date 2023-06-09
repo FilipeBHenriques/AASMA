@@ -51,7 +51,8 @@ async def main_battle(player1, player2, n_battles):
                 loses += 1
             else:
                 draws +=1
-            n += 1 
+            n += 1
+        time.sleep(10)
         battle_counter += 1   
 
     for battle in player1._battles.values():
