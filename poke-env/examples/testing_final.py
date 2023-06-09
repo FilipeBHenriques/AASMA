@@ -15,18 +15,17 @@ if len(sys.argv) > 1:
 else:
     print("No integer provided as an argument.")
 
-def print_dict(dict):
+def print_dict(dict, name1, name2):
     win_rate = dict["win_rate"]*100
-    print(f"Win Rate: {win_rate:.2f} %")
+    print(f"Win Rate {name1} : {win_rate:.2f} %")
     print("Wins : " + str(dict["wins"]))
     print("Loses : " + str(dict["loses"]))
     print("Draws : " + str(dict["draws"]))
     print("Average Number of Turns: " + str(float(dict["battle_duration_avg"])) + " turns")
     print("Average Pokemon alive: " + str(float(dict["pokemon_alive_avg"])))
-    print("Average Pokemon alive opp: " + str(float(dict["pokemon_alive_avg_opp"])))
+    print("Average Pokemon alive " + name2 + " : " + str(float(dict["pokemon_alive_avg_opp"])))
 
 async def main_battle(player1, player2, n_battles):
-    battle_number = 0
     n = 0
     threshold = time.time()
     battle_duration_total = 0
@@ -34,8 +33,6 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total_opp = 0
     draws = 0
     for _ in range(n_battles):
-        if battle_number % 50 == 0:
-            print(str(battle_number) + "/" + str(n_battles))
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0
@@ -47,8 +44,7 @@ async def main_battle(player1, player2, n_battles):
             battle_result = await player1.battle_against(player2, 1)
             if battle_result == "draw":
                 draws +=1
-            n += 1
-        battle_number+=1     
+            n += 1    
 
     for battle in player1._battles.values():
         battle_duration_total += battle._turn
@@ -105,7 +101,7 @@ async def main():
     )
 
     print("\nMetrics for Reactive Player against Random Player:")
-    print_dict(reactive_metrics)
+    print_dict(reactive_metrics, reactive_player._username, random_player._username)
 
     ##########################################################################################
 
@@ -116,8 +112,8 @@ async def main():
         % ("Proactive Player", proactive_player.n_won_battles, n_battles, time.time() - start)
     )
 
-    print("\nMetrics for Proactive Player against RandomPlayer:")
-    print_dict(proactive_metrics)
+    print("\nMetrics for Proactive Player against Random Player:")
+    print_dict(proactive_metrics, proactive_player._username, random_player._username)
 
     ##########################################################################################
 
@@ -149,7 +145,7 @@ async def main():
     )    
 
     print("\nMetrics for Proactive Player against Reactive Player:")
-    print_dict(proactive_metrics_against_reactive)
+    print_dict(proactive_metrics_against_reactive, proactive_player._username, reactive_player._username)
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())    
