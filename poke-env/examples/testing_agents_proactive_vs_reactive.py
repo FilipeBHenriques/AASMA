@@ -54,6 +54,7 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total_opp = 0
     draws = 0
     for _ in range(n_battles):
+        print(f"{_+1}/{n_battles}")
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0
@@ -66,6 +67,7 @@ async def main_battle(player1, player2, n_battles):
             if battle_result == "draw":
                 draws +=1
             n += 1    
+        time.sleep(10)
 
     for battle in player1._battles.values():
         battle_duration_total += battle._turn

@@ -24,11 +24,6 @@ if len(sys.argv) > 2:
     except ValueError:
         print("Invalid integer provided.")
 
-if handicap == 0:
-    test_team = Team.pick_random_team()
-else:
-    test_team = Team.pick_random_handicap_team(handicap)
-
 def print_dict(dict, name1, name2):
     win_rate = dict["win_rate"]*100
     print(f"Win Rate {name1} : {win_rate:.2f} %")
@@ -47,6 +42,13 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total_opp = 0
     draws = 0
     for _ in range(n_battles):
+        if handicap == 0:
+            test_team = Team.pick_random_team()
+        else:
+            test_team = Team.pick_random_handicap_team(handicap)
+        print(f"{_+1}/{n_battles}")
+        #player1._team = test_team
+        #player2._team = Team.pick_random_team()
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0
@@ -56,9 +58,12 @@ async def main_battle(player1, player2, n_battles):
             threshold = time.time()
         else:
             battle_result = await player1.battle_against(player2, 1)
+            print(battle_result)
             if battle_result == "draw":
                 draws +=1
             n += 1   
+        time.sleep(10)
+
 
     for battle in player1._battles.values():
         battle_duration_total += battle._turn
@@ -86,6 +91,8 @@ async def main_battle(player1, player2, n_battles):
 
 async def main():
     # We create two players.
+
+
     random_player = RandomPlayer(
         player_configuration=PlayerConfiguration("random-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
@@ -96,7 +103,7 @@ async def main():
         player_configuration=PlayerConfiguration("proactive-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
-        team=test_team)
+        team=Team.pick_random_team())
 
     start = time.time()
     proactive_metrics = await main_battle(proactive_player, random_player, n_battles)
