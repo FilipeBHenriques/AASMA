@@ -151,3 +151,31 @@ class Team():
     def pick_random_team():
         i = random.randint(0, 2)
         return teams[i]
+    
+    def remove_random_member(string):
+        # Split the string into sections
+        sections = string.strip().split('\n\n')
+        
+        if len(sections) <= 1:
+            # If there is only one section, return the original string
+            return string
+        
+        # Select a random section to remove
+        section_to_remove = random.choice(sections)
+        
+        # Remove the selected section from the list
+        sections.remove(section_to_remove)
+        
+        # Join the remaining sections back into a string
+        result = '\n\n'.join(sections)
+        
+        return result
+    
+    def pick_random_handicap_team(handicap):
+        i = random.randint(0, 2)
+        handicap_team = teams[i]
+
+        for j in range(handicap):
+            handicap_team = Team.remove_random_member(handicap_team)
+
+        return handicap_team

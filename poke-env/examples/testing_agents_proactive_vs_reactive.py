@@ -15,6 +15,27 @@ if len(sys.argv) > 1:
 else:
     print("No integer provided as an argument.")
 
+handicap_reactive = 0
+handicap_proactive = 0
+
+if len(sys.argv) > 3:
+    try:
+        if int(sys.argv[2]) < 5 and int(sys.argv[3]):
+            handicap_reactive = int(sys.argv[2])
+            handicap_proactive = int(sys.argv[3])
+    except ValueError:
+        print("Invalid integer provided.")
+
+if handicap_reactive == 0:
+    test_team_reactive = Team.pick_random_team()
+else:
+    test_team_reactive = Team.pick_random_handicap_team(handicap_reactive)
+
+if handicap_proactive == 0:
+    test_team_proactive = Team.pick_random_team()
+else:
+    test_team_proactive = Team.pick_random_handicap_team(handicap_proactive)
+
 def print_dict(dict, name1, name2):
     win_rate = dict["win_rate"]*100
     print(f"Win Rate {name1} : {win_rate:.2f} %")
@@ -76,13 +97,13 @@ async def main():
         player_configuration=PlayerConfiguration("reactive-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
-        team=Team.pick_random_team())
+        team=test_team_reactive)
     
     proactive_player = ProactivePlayer(
         player_configuration=PlayerConfiguration("proactive-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
-        team=Team.pick_random_team())
+        team=test_team_proactive)
 
     start = time.time()
     proactive_metrics = await main_battle(proactive_player, reactive_player, n_battles)
