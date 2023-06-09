@@ -36,19 +36,14 @@ def print_dict(dict, name1, name2):
 
 async def main_battle(player1, player2, n_battles):
     n = 0
+    wins = 0
+    loses = 0
+    draws = 0
     threshold = time.time()
     battle_duration_total = 0
     pokemon_alive_total = 0
     pokemon_alive_total_opp = 0
-    draws = 0
     for _ in range(n_battles):
-        if handicap == 0:
-            test_team = Team.pick_random_team()
-        else:
-            test_team = Team.pick_random_handicap_team(handicap)
-        print(f"{_+1}/{n_battles}")
-        #player1._team = test_team
-        #player2._team = Team.pick_random_team()
         if n == 5 and (time.time() - threshold) < 181:
             time.sleep(210 - (time.time() - threshold))
             n = 0
@@ -57,30 +52,45 @@ async def main_battle(player1, player2, n_battles):
             n = 0
             threshold = time.time()
         else:
-            battle_result = await player1.battle_against(player2, 1)
-            print(battle_result)
-            if battle_result == "draw":
+            await player1.battle_against(player2, 1)
+            if player1.n_won_battles == 1:
+                wins += 1
+            elif player2.n_won_battles == 1:
+                loses += 1
+            else:
                 draws +=1
-            n += 1   
-        time.sleep(10)
+            for battle in player1._battles.values():
+                battle_duration_total += battle._turn
+                pokemon_alive = len(battle.available_switches)
+                if "FNT" not in str(battle.active_pokemon._status):
+                    pokemon_alive += 1
+                pokemon_alive_total += pokemon_alive
+            for battle in player2._battles.values():
+                pokemon_alive_total_opp += len(battle.available_switches)
+                if "FNT" not in str(battle.active_pokemon._status):
+                    pokemon_alive_total_opp += 1
+            n += 1
+        if handicap == 0:
+            test_team_proactive = Team.pick_random_team()
+        else:
+            test_team_proactive = Team.pick_random_handicap_team(handicap)
 
-
-    for battle in player1._battles.values():
-        battle_duration_total += battle._turn
-        pokemon_alive = len(battle.available_switches)
-        if "FNT" not in str(battle.active_pokemon._status):
-            pokemon_alive += 1
-        pokemon_alive_total += pokemon_alive
+        player2 = RandomPlayer(
+        player_configuration=PlayerConfiguration("random-agnt", "password"),
+        server_configuration=LocalhostServerConfiguration,
+        battle_format="gen1ou", 
+        team=Team.pick_random_team())
     
-    for battle in player2._battles.values():
-        pokemon_alive_total_opp += len(battle.available_switches)
-        if "FNT" not in str(battle.active_pokemon._status):
-            pokemon_alive_total_opp += 1
+        player1 = ProactivePlayer(
+        player_configuration=PlayerConfiguration("proactive-agnt", "password"),
+        server_configuration=LocalhostServerConfiguration,
+        battle_format="gen1ou", 
+        team=test_team_proactive)    
     
     metrics = {
-        "win_rate": player1.n_won_battles / n_battles,
-        "wins" : player1.n_won_battles,
-        "loses" : (n_battles - player1.n_won_battles - draws),
+        "win_rate": wins / n_battles,
+        "wins" : wins,
+        "loses" : loses,
         "draws": draws,
         "battle_duration_avg": float(battle_duration_total / n_battles),
         "pokemon_alive_avg": float(pokemon_alive_total / n_battles),
@@ -91,19 +101,22 @@ async def main_battle(player1, player2, n_battles):
 
 async def main():
     # We create two players.
-
-
     random_player = RandomPlayer(
         player_configuration=PlayerConfiguration("random-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
         team=Team.pick_random_team())
     
+    if handicap == 0:
+        test_team_proactive = Team.pick_random_team()
+    else:
+        test_team_proactive = Team.pick_random_handicap_team(handicap)
+
     proactive_player = ProactivePlayer(
         player_configuration=PlayerConfiguration("proactive-agnt", "password"),
         server_configuration=LocalhostServerConfiguration,
         battle_format="gen1ou", 
-        team=Team.pick_random_team())
+        team=test_team_proactive)
 
     start = time.time()
     proactive_metrics = await main_battle(proactive_player, random_player, n_battles)
