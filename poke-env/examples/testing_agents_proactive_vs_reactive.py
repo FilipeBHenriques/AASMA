@@ -49,6 +49,7 @@ async def main_battle(player1, player2, n_battles):
     pokemon_alive_total = 0
     pokemon_alive_total_opp = 0
     for _ in range(n_battles):
+        print(f"{_+1}/{n_battles}")
         if handicap_reactive == 0:
             test_team_reactive = Team.pick_random_team()
         else:
