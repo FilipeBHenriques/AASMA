@@ -23,6 +23,7 @@ def print_dict(dict):
     print("Draws : " + str(dict["draws"]))
     print("Average Number of Turns: " + str(float(dict["battle_duration_avg"])) + " turns")
     print("Average Pokemon alive: " + str(float(dict["pokemon_alive_avg"])))
+    print("Average Pokemon alive opp: " + str(float(dict["pokemon_alive_avg_opp"])))
 
 async def main_battle(player1, player2, n_battles):
     battle_number = 0
@@ -30,6 +31,7 @@ async def main_battle(player1, player2, n_battles):
     threshold = time.time()
     battle_duration_total = 0
     pokemon_alive_total = 0
+    pokemon_alive_total_opp = 0
     draws = 0
     for _ in range(n_battles):
         if battle_number % 50 == 0:
@@ -55,13 +57,19 @@ async def main_battle(player1, player2, n_battles):
             pokemon_alive += 1
         pokemon_alive_total += pokemon_alive
     
+    for battle in player2._battles.values():
+        pokemon_alive_total_opp += len(battle.available_switches)
+        if "FNT" not in str(battle.active_pokemon._status):
+            pokemon_alive_total_opp += 1
+    
     metrics = {
         "win_rate": player1.n_won_battles / n_battles,
         "wins" : player1.n_won_battles,
         "loses" : (n_battles - player1.n_won_battles - draws),
         "draws": draws,
         "battle_duration_avg": float(battle_duration_total / n_battles),
-        "pokemon_alive_avg": float(pokemon_alive_total / n_battles)
+        "pokemon_alive_avg": float(pokemon_alive_total / n_battles),
+        "pokemon_alive_avg_opp": float(pokemon_alive_total_opp / n_battles)
     }
 
     return metrics
@@ -88,17 +96,16 @@ async def main():
         battle_format="gen1ou",
         team=Team.pick_random_team(),
     )
-    """
+    
     start = time.time()
     reactive_metrics = await main_battle(reactive_player, random_player, n_battles)
     print(
-        "\n%s won %d / %d battles against the RandomPlayer [this took %f seconds]"
+        "\n%s won %d / %d battles against the Random Player [this took %f seconds]"
         % ("Reactive Player", reactive_player.n_won_battles, n_battles, time.time() - start)
     )
 
-    print("\nMetrics for Reactive Player against RandomPlayer:")
+    print("\nMetrics for Reactive Player against Random Player:")
     print_dict(reactive_metrics)
-    """
 
     ##########################################################################################
 
