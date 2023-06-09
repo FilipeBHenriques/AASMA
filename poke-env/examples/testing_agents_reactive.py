@@ -5,6 +5,8 @@ import sys
 from poke_env.player import RandomPlayer, ReactivePlayer
 from poke_env import LocalhostServerConfiguration, ShowdownServerConfiguration, PlayerConfiguration
 from poke_env.teambuilder.gen1ou_team import Team
+from poke_env.teambuilder.constant_teambuilder import ConstantTeambuilder
+
 
 n_battles = 0
 if len(sys.argv) > 1:
@@ -75,17 +77,9 @@ async def main_battle(player1, player2, n_battles):
         else:
             test_team = Team.pick_random_handicap_team(handicap)
 
-        player2 = RandomPlayer(
-        player_configuration=PlayerConfiguration("random-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=Team.pick_random_team())
-    
-        player1 = ReactivePlayer(
-        player_configuration=PlayerConfiguration("reactive-agnt", "password"),
-        server_configuration=LocalhostServerConfiguration,
-        battle_format="gen1ou", 
-        team=test_team)   
+        player2.reset_battles()
+        player1.reset_battles()
+        player1._team = ConstantTeambuilder(test_team)   
     
     metrics = {
         "win_rate": wins / n_battles,
@@ -123,7 +117,7 @@ async def main():
 
     print(
         "\n%s won %d / %d battles [this took %f seconds]"
-        % ("Reactive Player", reactive_player.n_won_battles, n_battles, time.time() - start)
+        % ("Reactive Player", reactive_metrics["wins"], n_battles, time.time() - start)
     )
 
     print("\nMetrics for Reactive Player against Random Player:")
